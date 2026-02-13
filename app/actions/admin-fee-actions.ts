@@ -2,10 +2,13 @@
 
 import { db } from "@/db";
 import { adminFeeRules } from "@/db/schema";
-import { eq, and, lte, gte } from "drizzle-orm";
+import { eq, and, lte, gte, asc } from "drizzle-orm";
 
 export async function getAdminFeeRules() {
-  const rows = await db.select().from(adminFeeRules);
+  const rows = await db
+    .select()
+    .from(adminFeeRules)
+    .orderBy(asc(adminFeeRules.minAmount));
   return rows.map((r) => ({
     id: r.id,
     category: r.category as "transfer" | "withdraw" | "e-wallet",
