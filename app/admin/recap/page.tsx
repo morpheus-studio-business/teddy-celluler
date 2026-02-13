@@ -257,14 +257,25 @@ export default function AdminRecapPage() {
     .filter((t) => t.type === "expense")
     .reduce((sum, t) => sum + t.total, 0);
 
-  const totalProfit = filteredTransactions.reduce((sum, t) => {
+  const calculateProfit = (t: Transaction) => {
+    // General category: Profit is always 0
+    if (t.category === "general") return 0;
+
     // Service categories: Profit is Admin Fee
     if (["transfer", "withdraw", "e-wallet"].includes(t.category)) {
-      return sum + t.adminFee;
+      return t.adminFee;
     }
+
+    // Expense type (fallback): Profit is 0
+    if (t.type === "expense") return 0;
+
     // Product categories: Profit is Sales (Total) - Capital
     // If capitalPrice is null/0, it assumes 100% profit (or 0 cost)
-    return sum + (t.total - (t.capitalPrice || 0));
+    return t.total - (t.capitalPrice || 0);
+  };
+
+  const totalProfit = filteredTransactions.reduce((sum, t) => {
+    return sum + calculateProfit(t);
   }, 0);
 
   const currentPeriodBalance = totalIncome - totalExpense;
@@ -323,7 +334,7 @@ export default function AdminRecapPage() {
       categoryOptions.find((c) => c.value === t.category)?.label || t.category,
       t.description,
       formatCurrency(t.amount),
-      formatCurrency(t.adminFee),
+      formatCurrency(calculateProfit(t)),
       formatCurrency(t.total),
     ]);
 
@@ -646,13 +657,7 @@ export default function AdminRecapPage() {
                     <div className="text-right">
                       <p className="text-xs text-slate-500 mb-1">Keuntungan</p>
                       <p className="font-medium text-slate-700 dark:text-slate-300">
-                        {formatCurrency(
-                          ["withdraw", "transfer", "e-wallet"].includes(
-                            t.category,
-                          )
-                            ? t.adminFee
-                            : t.total - (t.capitalPrice || 0),
-                        )}
+                        {formatCurrency(calculateProfit(t))}
                       </p>
                     </div>
                   </div>
@@ -815,13 +820,7 @@ export default function AdminRecapPage() {
                         {formatCurrency(t.amount)}
                       </TableCell>
                       <TableCell className="text-right font-mono text-slate-400 dark:text-slate-500">
-                        {formatCurrency(
-                          ["withdraw", "transfer", "e-wallet"].includes(
-                            t.category,
-                          )
-                            ? t.adminFee
-                            : t.total - (t.capitalPrice || 0),
-                        )}
+                        {formatCurrency(calculateProfit(t))}
                       </TableCell>
                       <TableCell
                         className={`text-right font-mono font-bold whitespace-nowrap ${
