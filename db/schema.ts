@@ -16,6 +16,7 @@ export const categoryEnum = pgEnum("category", [
   "pulsa",
   "e-wallet",
   "other",
+  "general",
 ]);
 export const txTypeEnum = pgEnum("tx_type", ["income", "expense"]);
 export const feeCategoryEnum = pgEnum("fee_category", [
