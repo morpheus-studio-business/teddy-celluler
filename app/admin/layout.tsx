@@ -21,6 +21,12 @@ import {
 
 const menuItems = [
   {
+    label: "Rekap",
+    href: "/admin/recap",
+    icon: ClipboardList,
+    active: true,
+  },
+  {
     label: "Transfer",
     href: "/admin/transfer",
     icon: ArrowLeftRight,
@@ -60,12 +66,6 @@ const menuItems = [
     label: "Aksesoris",
     href: "/admin/aksesoris",
     icon: Package,
-    active: true,
-  },
-  {
-    label: "Rekap",
-    href: "/admin/recap",
-    icon: ClipboardList,
     active: true,
   },
   {
