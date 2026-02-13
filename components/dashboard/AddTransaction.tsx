@@ -50,9 +50,27 @@ export function AddTransaction({
   useEffect(() => {
     // Reset category when mode changes to ensure valid selection
     if (mode === "income") {
-      if (category === "withdraw") setCategory("transfer");
+      const validIncomeCategories: TransactionCategory[] = [
+        "transfer",
+        "e-wallet",
+        "voucher",
+        "data_package",
+        "pulsa",
+        "other",
+        "general",
+      ];
+      if (!validIncomeCategories.includes(category)) {
+        setCategory("transfer");
+      }
     } else {
-      setCategory("withdraw");
+      // Expense mode
+      const validExpenseCategories: TransactionCategory[] = [
+        "withdraw",
+        "general",
+      ];
+      if (!validExpenseCategories.includes(category)) {
+        setCategory("withdraw");
+      }
     }
   }, [mode, category]);
 
@@ -156,18 +174,8 @@ export function AddTransaction({
     const parsedAmount = parseFloat(amount) || 0;
     const parsedAdmin = parseFloat(adminFee) || 0;
 
-    let calculatedTotal = 0;
-    let type: "income" | "expense" = "income";
-
-    if (category !== "withdraw") {
-      // Income: User pays Amount + Admin
-      calculatedTotal = parsedAmount + parsedAdmin;
-      type = "income";
-    } else {
-      // Expense: Same calculation, Amount + Admin
-      type = "expense";
-      calculatedTotal = parsedAmount + parsedAdmin;
-    }
+    const calculatedTotal = parsedAmount + parsedAdmin;
+    const type: "income" | "expense" = mode;
 
     // Special logic for General Income:
     // Profit should be 0, so Capital Price must equal Amount
@@ -356,10 +364,10 @@ export function AddTransaction({
         )}
         <div className="flex-1 space-y-2">
           <label className="text-sm font-medium text-muted-foreground">
-            Total {category === "withdraw" ? "Keluar" : "Masuk"}
+            Total {mode === "expense" ? "Keluar" : "Masuk"}
           </label>
           <div
-            className={`flex h-10 w-full items-center rounded-md border border-input px-3 py-2 text-sm font-medium ${category === "withdraw" ? "bg-rose-50 text-rose-700 border-rose-200" : "bg-emerald-50 text-emerald-700 border-emerald-200"}`}
+            className={`flex h-10 w-full items-center rounded-md border border-input px-3 py-2 text-sm font-medium ${mode === "expense" ? "bg-rose-50 text-rose-700 border-rose-200" : "bg-emerald-50 text-emerald-700 border-emerald-200"}`}
           >
             {new Intl.NumberFormat("id-ID", {
               style: "currency",
@@ -370,7 +378,7 @@ export function AddTransaction({
         <Button
           type="submit"
           className={`w-full md:w-auto ${
-            category === "withdraw"
+            mode === "expense"
               ? "bg-rose-600 hover:bg-rose-700 shadow-rose-900/20"
               : "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-900/20"
           } text-white shadow-lg`}

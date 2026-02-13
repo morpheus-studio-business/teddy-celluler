@@ -217,7 +217,9 @@ export function TransactionList({ transactions }: TransactionListProps) {
                             ? "E-Wallet"
                             : t.category === "other"
                               ? "Aksesoris"
-                              : t.category}
+                              : t.category === "general"
+                                ? "Lainnya"
+                                : t.category}
                     </span>
                   </div>
                 </TableCell>
