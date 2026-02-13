@@ -334,8 +334,23 @@ export function AddTransaction({
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 items-end">
+        {/* Manual Capital Price Input */}
+        {selectedProductId === "manual_input" && (
+          <div className="flex-1 space-y-2">
+            <label className="text-sm font-medium">Harga Modal</label>
+            <NumberInput
+              placeholder="0"
+              value={capitalPrice.toString()}
+              onValueChange={(val) => setCapitalPrice(parseFloat(val) || 0)}
+              className="bg-white dark:bg-slate-950 border-neutral-200 dark:border-neutral-800"
+            />
+          </div>
+        )}
+
         <div className="flex-1 space-y-2">
-          <label className="text-sm font-medium">Harga (Nominal)</label>
+          <label className="text-sm font-medium">
+            {mode === "income" ? "Harga Jual" : "Nominal"}
+          </label>
           <NumberInput
             placeholder="0"
             value={amount}
@@ -347,6 +362,7 @@ export function AddTransaction({
             }
           />
         </div>
+
         {["transfer", "withdraw", "e-wallet"].includes(category) && (
           <div className="flex-1 space-y-2">
             <label className="text-sm font-medium">Biaya Admin</label>
