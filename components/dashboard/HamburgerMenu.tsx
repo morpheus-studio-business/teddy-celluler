@@ -2,15 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import {
-  Menu,
-  X,
-  LayoutDashboard,
-  Settings,
-  LogIn,
-  LogOut,
-  UserPlus,
-} from "lucide-react";
+import { Menu, X, Settings, LogIn, LogOut, UserPlus } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 
 export function HamburgerMenu() {
@@ -61,15 +53,6 @@ export function HamburgerMenu() {
               </div>
 
               <div className="p-2">
-                <Link
-                  href="/"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                >
-                  <LayoutDashboard className="h-4 w-4" />
-                  Dashboard
-                </Link>
-
                 {(session.user as any).role === "admin" && (
                   <Link
                     href="/admin"

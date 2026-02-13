@@ -31,7 +31,7 @@ export async function createProduct(params: CreateProductParams) {
     });
 
     revalidatePath(
-      `/admin/${params.category === "voucher" ? "voucher" : params.category === "pulsa" ? "pulsa" : params.category === "data_package" ? "paket-data" : "lainnya"}`,
+      `/admin/${params.category === "voucher" ? "voucher" : params.category === "pulsa" ? "pulsa" : params.category === "data_package" ? "paket-data" : "aksesoris"}`,
     );
 
     return { success: true };
@@ -67,7 +67,7 @@ export async function deleteProduct(id: string) {
     revalidatePath("/admin/voucher");
     revalidatePath("/admin/paket-data");
     revalidatePath("/admin/pulsa");
-    revalidatePath("/admin/lainnya");
+    revalidatePath("/admin/aksesoris");
     return { success: true };
   } catch (error) {
     console.error("Failed to delete product:", error);

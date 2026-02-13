@@ -29,7 +29,8 @@ const ACTIVE_PERIODS = [
   { label: "5 Hari", value: 5 },
   { label: "7 Hari", value: 7 },
   { label: "14 Hari", value: 14 },
-  { label: "30 Hari", value: 30 },
+  { label: "28 Hari", value: 28 },
+
   { label: "60 Hari", value: 60 },
   { label: "90 Hari", value: 90 },
 ];
@@ -50,7 +51,7 @@ export function ProductEntryForm({
   const [quota, setQuota] = useState("");
   const [activeDays, setActiveDays] = useState(
     ACTIVE_PERIODS[5].value.toString(),
-  ); // Default 30 days
+  ); // Default 28 days
   const [useCustomDays, setUseCustomDays] = useState(false);
   const [customDays, setCustomDays] = useState("");
   const [capitalPrice, setCapitalPrice] = useState("");
@@ -118,13 +119,13 @@ export function ProductEntryForm({
       {category === "other" ? (
         <div className="space-y-2">
           <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-            Keterangan / Nama Produk
+            Nama Aksesoris / Produk
           </label>
           <input
             type="text"
             value={provider} // Reuse provider field for Description
             onChange={(e) => setProvider(e.target.value)}
-            placeholder="Contoh: Jasa Service, Aksesoris, dll"
+            placeholder="Contoh: Casing, Charger, Kabel Data, dll"
             required
             className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-500 transition-all"
           />

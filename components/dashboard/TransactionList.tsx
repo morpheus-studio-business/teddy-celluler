@@ -1,6 +1,6 @@
 import { Transaction } from "@/types";
 import React, { useState } from "react";
-import { Pencil } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { TransactionModal } from "@/components/dashboard/TransactionModal";
 import { EditTransaction } from "@/components/dashboard/EditTransaction";
@@ -13,6 +13,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { deleteTransaction } from "@/app/actions/transaction-actions";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 
@@ -28,10 +39,22 @@ export function TransactionList({ transactions }: TransactionListProps) {
   const [selectedTransaction, setSelectedTransaction] =
     useState<Transaction | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const startEditing = (t: Transaction) => {
     setSelectedTransaction(t);
     setIsEditOpen(true);
+  };
+
+  const confirmDelete = (id: string) => {
+    setDeleteId(id);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    await deleteTransaction(deleteId);
+    setDeleteId(null);
+    router.refresh();
   };
 
   const handleUpdate = () => {
@@ -72,12 +95,20 @@ export function TransactionList({ transactions }: TransactionListProps) {
                     {t.description}
                   </span>
                   {isAdmin && (
-                    <button
-                      onClick={() => startEditing(t)}
-                      className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                    >
-                      <Pencil className="h-3 w-3" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => startEditing(t)}
+                        className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                      >
+                        <Pencil className="h-3 w-3" />
+                      </button>
+                      <button
+                        onClick={() => confirmDelete(t.id)}
+                        className="p-1 text-rose-400 hover:text-rose-600 dark:hover:text-rose-300"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
                   )}
                 </div>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -161,12 +192,20 @@ export function TransactionList({ transactions }: TransactionListProps) {
                         {t.description}
                       </span>
                       {isAdmin && (
-                        <button
-                          onClick={() => startEditing(t)}
-                          className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                        >
-                          <Pencil className="h-3 w-3" />
-                        </button>
+                        <div className="flex items-center gap-1 opacity-0 group-hover/edit:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => startEditing(t)}
+                            className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </button>
+                          <button
+                            onClick={() => confirmDelete(t.id)}
+                            className="p-1 text-rose-400 hover:text-rose-600 dark:hover:text-rose-300"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        </div>
                       )}
                     </div>
                     <span className="text-xs text-muted-foreground capitalize">
@@ -177,7 +216,7 @@ export function TransactionList({ transactions }: TransactionListProps) {
                           : t.category === "e-wallet"
                             ? "E-Wallet"
                             : t.category === "other"
-                              ? "Lainnya"
+                              ? "Aksesoris"
                               : t.category}
                     </span>
                   </div>
@@ -218,6 +257,30 @@ export function TransactionList({ transactions }: TransactionListProps) {
           />
         )}
       </TransactionModal>
+
+      <AlertDialog
+        open={!!deleteId}
+        onOpenChange={(open) => !open && setDeleteId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hapus Transaksi?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Apakah anda yakin ingin menghapus catatan transaksi ini? Tindakan
+              ini tidak dapat dibatalkan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-rose-600 hover:bg-rose-700 text-white"
+            >
+              Hapus
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

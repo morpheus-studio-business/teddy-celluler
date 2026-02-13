@@ -10,6 +10,16 @@ import {
 } from "@/app/actions/admin-fee-actions";
 import { NumberInput } from "@/components/ui/number-input";
 import { Modal } from "@/components/ui/modal";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface FeeRulesEditorProps {
   category: "transfer" | "withdraw" | "e-wallet";
@@ -22,6 +32,7 @@ export function FeeRulesEditor({ category, title }: FeeRulesEditorProps) {
   const [maxAmount, setMaxAmount] = useState("");
   const [adminFee, setAdminFee] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const formatCurrency = (val: number) =>
     new Intl.NumberFormat("id-ID", {
@@ -57,9 +68,16 @@ export function FeeRulesEditor({ category, title }: FeeRulesEditorProps) {
     setIsModalOpen(false);
   };
 
-  const handleDelete = async (id: string) => {
-    const updated = await deleteAdminFeeRule(id);
-    setRules(updated.filter((r) => r.category === category));
+  const handleDeleteClick = (id: string) => {
+    setDeleteId(id);
+  };
+
+  const confirmDelete = async () => {
+    if (deleteId) {
+      const updated = await deleteAdminFeeRule(deleteId);
+      setRules(updated.filter((r) => r.category === category));
+      setDeleteId(null);
+    }
   };
 
   return (
@@ -192,7 +210,7 @@ export function FeeRulesEditor({ category, title }: FeeRulesEditorProps) {
                       </td>
                       <td className="px-5 py-3 text-right">
                         <button
-                          onClick={() => handleDelete(rule.id)}
+                          onClick={() => handleDeleteClick(rule.id)}
                           className="p-1.5 rounded-lg text-rose-500 hover:bg-red-50 dark:hover:bg-rose-950/30 transition-colors"
                           title="Hapus"
                         >
@@ -238,7 +256,7 @@ export function FeeRulesEditor({ category, title }: FeeRulesEditorProps) {
                       </span>
                     </div>
                     <button
-                      onClick={() => handleDelete(rule.id)}
+                      onClick={() => handleDeleteClick(rule.id)}
                       className="p-2 rounded-lg text-rose-500 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-950/40 transition-colors self-end"
                       title="Hapus"
                     >
@@ -251,6 +269,30 @@ export function FeeRulesEditor({ category, title }: FeeRulesEditorProps) {
           </div>
         )}
       </div>
+
+      <AlertDialog
+        open={!!deleteId}
+        onOpenChange={(open) => !open && setDeleteId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hapus Aturan?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Apakah anda yakin ingin menghapus aturan biaya ini? Tindakan ini
+              tidak dapat dibatalkan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-rose-600 hover:bg-rose-700 text-white"
+            >
+              Hapus
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

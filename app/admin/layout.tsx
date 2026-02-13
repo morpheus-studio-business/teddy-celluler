@@ -57,8 +57,8 @@ const menuItems = [
     active: true,
   },
   {
-    label: "Lainnya",
-    href: "/admin/lainnya",
+    label: "Aksesoris",
+    href: "/admin/aksesoris",
     icon: Package,
     active: true,
   },

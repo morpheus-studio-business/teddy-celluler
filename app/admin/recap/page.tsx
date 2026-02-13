@@ -46,7 +46,8 @@ const categoryOptions: { value: TransactionCategory | "all"; label: string }[] =
     { value: "data_package", label: "Paket Data" },
     { value: "pulsa", label: "Pulsa" },
     { value: "e-wallet", label: "E-Wallet" },
-    { value: "other", label: "Lainnya" },
+    { value: "other", label: "Aksesoris" },
+    { value: "general", label: "Lainnya" },
   ];
 
 const dateOptions: { value: FilterType | "custom"; label: string }[] = [
@@ -319,7 +320,7 @@ export default function AdminRecapPage() {
     const tableData = filteredTransactions.map((t, idx) => [
       idx + 1,
       formatDate(t.date),
-      t.category === "withdraw" ? "Tarik Tunai" : t.category,
+      categoryOptions.find((c) => c.value === t.category)?.label || t.category,
       t.description,
       formatCurrency(t.amount),
       formatCurrency(t.adminFee),
@@ -623,14 +624,15 @@ export default function AdminRecapPage() {
                       </p>
                     </div>
                     <span
-                      className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize shrink-0 ml-2
+                      className={`px-2.5 py-1 rounded-full text-xs font-medium shrink-0 ml-2
                         ${
                           t.category === "withdraw"
                             ? "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400"
                             : "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300"
                         }`}
                     >
-                      {t.category === "withdraw" ? "Tarik Tunai" : t.category}
+                      {categoryOptions.find((c) => c.value === t.category)
+                        ?.label || t.category}
                     </span>
                   </div>
 
@@ -795,16 +797,15 @@ export default function AdminRecapPage() {
                       </TableCell>
                       <TableCell>
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                             ${
                               t.category === "withdraw"
                                 ? "bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400"
                                 : "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300"
                             }`}
                         >
-                          {t.category === "withdraw"
-                            ? "Tarik Tunai"
-                            : t.category}
+                          {categoryOptions.find((c) => c.value === t.category)
+                            ?.label || t.category}
                         </span>
                       </TableCell>
                       <TableCell className="text-slate-700 dark:text-slate-300">

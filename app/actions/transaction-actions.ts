@@ -96,3 +96,17 @@ export async function updateTransaction(data: {
 
   return await getTransactions();
 }
+
+export async function deleteTransaction(id: string) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session || session.user.role !== "admin") {
+    throw new Error("Unauthorized: Only admin can delete transactions");
+  }
+
+  await db.delete(transactions).where(eq(transactions.id, id));
+
+  return await getTransactions();
+}

@@ -169,6 +169,17 @@ export function AddTransaction({
       calculatedTotal = parsedAmount + parsedAdmin;
     }
 
+    // Special logic for General Income:
+    // Profit should be 0, so Capital Price must equal Amount
+    let finalCapitalPrice = selectedProductId ? capitalPrice : undefined;
+    if (category === "general") {
+      if (type === "income") {
+        finalCapitalPrice = parsedAmount;
+      } else {
+        finalCapitalPrice = 0;
+      }
+    }
+
     onAdd({
       description,
       amount: parsedAmount,
@@ -176,7 +187,7 @@ export function AddTransaction({
       total: calculatedTotal,
       category,
       type,
-      capitalPrice: selectedProductId ? capitalPrice : undefined,
+      capitalPrice: finalCapitalPrice || 0,
       productId: selectedProductId || undefined,
     });
 
@@ -218,10 +229,14 @@ export function AddTransaction({
                   <SelectItem value="voucher">Voucher</SelectItem>
                   <SelectItem value="data_package">Paket Data</SelectItem>
                   <SelectItem value="pulsa">Pulsa</SelectItem>
-                  <SelectItem value="other">Lainnya</SelectItem>
+                  <SelectItem value="other">Aksesoris</SelectItem>
+                  <SelectItem value="general">Lainnya</SelectItem>
                 </>
               ) : (
-                <SelectItem value="withdraw">Tarik Tunai</SelectItem>
+                <>
+                  <SelectItem value="withdraw">Tarik Tunai</SelectItem>
+                  <SelectItem value="general">Lainnya</SelectItem>
+                </>
               )}
             </SelectContent>
           </Select>
@@ -281,7 +296,13 @@ export function AddTransaction({
             </Select>
           ) : (
             <Input
-              placeholder="Contoh: Transfer ke BCA A/N Budi"
+              placeholder={
+                category === "withdraw"
+                  ? "Contoh: Tarik Tunai BCA"
+                  : category === "general"
+                    ? "Keterangan Manual..."
+                    : "Keterangan Transaksi..."
+              }
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />

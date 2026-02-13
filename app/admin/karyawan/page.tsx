@@ -20,6 +20,16 @@ import {
 } from "@/app/actions/user-actions";
 
 import { Modal } from "@/components/ui/modal";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function AdminUserPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -31,6 +41,7 @@ export default function AdminUserPage() {
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     getUsers().then(setUsers);
@@ -77,9 +88,16 @@ export default function AdminUserPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    const updated = await deleteUser(id);
-    setUsers(updated);
+  const handleDeleteClick = (id: string) => {
+    setDeleteId(id);
+  };
+
+  const confirmDelete = async () => {
+    if (deleteId) {
+      const updated = await deleteUser(deleteId);
+      setUsers(updated);
+      setDeleteId(null);
+    }
   };
 
   const handleRoleChange = async (
@@ -280,7 +298,7 @@ export default function AdminUserPage() {
                     <option value="admin">Admin</option>
                   </select>
                   <button
-                    onClick={() => handleDelete(user.id)}
+                    onClick={() => handleDeleteClick(user.id)}
                     className="h-9 w-9 flex items-center justify-center rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 border border-slate-200 dark:border-slate-800 hover:border-rose-200 dark:hover:border-rose-900 transition-colors"
                     title="Hapus User"
                   >
@@ -292,6 +310,30 @@ export default function AdminUserPage() {
           </div>
         )}
       </div>
+
+      <AlertDialog
+        open={!!deleteId}
+        onOpenChange={(open) => !open && setDeleteId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hapus User?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Apakah anda yakin ingin menghapus user ini? Tindakan ini tidak
+              dapat dibatalkan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-rose-600 hover:bg-rose-700 text-white"
+            >
+              Hapus
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

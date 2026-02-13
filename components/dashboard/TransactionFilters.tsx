@@ -98,7 +98,7 @@ export function TransactionFilters({
                           : categoryFilter === "e-wallet"
                             ? "E-Wallet"
                             : categoryFilter === "other"
-                              ? "Lainnya"
+                              ? "Aksesoris"
                               : "Semua Tipe"}
               </span>
             </Button>
@@ -128,6 +128,9 @@ export function TransactionFilters({
               E-Wallet
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setCategoryFilter("other")}>
+              Aksesoris
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setCategoryFilter("general")}>
               Lainnya
             </DropdownMenuItem>
           </DropdownMenuContent>

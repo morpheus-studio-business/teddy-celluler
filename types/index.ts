@@ -5,7 +5,8 @@ export type TransactionCategory =
   | "data_package"
   | "pulsa"
   | "e-wallet"
-  | "other";
+  | "other"
+  | "general";
 
 export interface Transaction {
   id: string;
