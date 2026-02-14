@@ -28,7 +28,7 @@ export function DashboardHeader({
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl overflow-hidden shadow-sm shrink-0">
                 <img
-                  src="/logo.svg"
+                  src="/logo.png"
                   alt="TC"
                   className="w-full h-full object-contain"
                 />

@@ -118,7 +118,7 @@ export default function AdminLayout({
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0">
                 <Image
-                  src="/logo.svg"
+                  src="/logo.png"
                   alt="TC"
                   width={32}
                   height={32}

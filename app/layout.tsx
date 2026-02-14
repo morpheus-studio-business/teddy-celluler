@@ -30,8 +30,9 @@ export const metadata: Metadata = {
     title: "Tedy Celluler",
   },
   icons: {
-    icon: "/icons/icon-192x192.svg",
-    apple: "/icons/icon-192x192.svg",
+    icon: "/logo/favicon-32x32.png",
+    shortcut: "/favicon.ico",
+    apple: "/logo/apple-touch-icon.png",
   },
 };
 
