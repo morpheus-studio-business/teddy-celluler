@@ -6,7 +6,7 @@ const withPWA = withPWAInit({
   cacheOnFrontEndNav: true,
   aggressiveFrontEndNavCaching: true,
   reloadOnOnline: true,
-  disable: process.env.NODE_ENV === "development",
+  disable: false, // Enable PWA in development for testing
   workboxOptions: {
     disableDevLogs: true,
   },
