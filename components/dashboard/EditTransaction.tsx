@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { NumberInput } from "@/components/ui/number-input";
 import { Input } from "@/components/ui/input";
@@ -34,11 +34,11 @@ export function EditTransaction({
 
   // Auto-calculate total when amount/admin changes
   const currentTotal = (() => {
-    const a = parseFloat(amount.replace(/\./g, "")) || 0; // handle formatted if passed, but state should be raw usually?
-    // Wait, NumberInput might return raw number or formatted string?
-    // Looking at usages, NumberInput onValueChange returns string (raw).
-    // But let's be safe.
+    const a = parseFloat(amount.replace(/\./g, "")) || 0;
     const f = parseFloat(adminFee) || 0;
+    if (category === "withdraw") {
+      return a - f;
+    }
     return a + f;
   })();
 
@@ -46,12 +46,14 @@ export function EditTransaction({
     e.preventDefault();
     setIsSaving(true);
     try {
+      // Recalculate total just to be safe or use currentTotal
+      // Logic is already in currentTotal which depends on category
       await updateTransaction({
         id: transaction.id,
         description,
         amount: parseFloat(amount) || 0,
         adminFee: parseFloat(adminFee) || 0,
-        total: currentTotal,
+        total: currentTotal, // This now reflects the correct logic
         category,
         type,
       });

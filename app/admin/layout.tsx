@@ -117,13 +117,14 @@ export default function AdminLayout({
             </button>
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0">
-                <Image
-                  src="/logo.png"
-                  alt="TC"
-                  width={32}
-                  height={32}
-                  className="w-full h-full object-contain"
-                />
+                <div className="relative w-full h-full">
+                  <Image
+                    src="/logo.png"
+                    alt="TC"
+                    fill
+                    className="object-contain"
+                  />
+                </div>
               </div>
               <h1 className="text-lg font-bold text-slate-900 dark:text-white">
                 Admin Panel

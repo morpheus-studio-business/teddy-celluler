@@ -174,7 +174,11 @@ export function AddTransaction({
     const parsedAmount = parseFloat(amount) || 0;
     const parsedAdmin = parseFloat(adminFee) || 0;
 
-    const calculatedTotal = parsedAmount + parsedAdmin;
+    let calculatedTotal = parsedAmount + parsedAdmin;
+    if (category === "withdraw") {
+      calculatedTotal = parsedAmount - parsedAdmin;
+    }
+
     const type: "income" | "expense" = mode;
 
     // Special logic for General Income:
@@ -213,6 +217,9 @@ export function AddTransaction({
   const currentTotal = (() => {
     const a = parseFloat(amount) || 0;
     const f = parseFloat(adminFee) || 0;
+    if (category === "withdraw") {
+      return a - f;
+    }
     return a + f;
   })();
 
