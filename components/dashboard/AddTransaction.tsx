@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Plus } from "lucide-react";
 import { getProducts } from "@/app/actions/products";
 import { Button } from "@/components/ui/button";
@@ -223,6 +223,26 @@ export function AddTransaction({
     return a + f;
   })();
 
+  const formatCurrency = useMemo(
+    () =>
+      new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        maximumFractionDigits: 0,
+      }),
+    [],
+  );
+
+  const productOptions = useMemo(() => {
+    return filteredProducts.map((p) => (
+      <SelectItem key={p.id} value={p.id}>
+        {category === "other"
+          ? `${p.provider} - ${formatCurrency.format(p.sellingPrice)}`
+          : `${p.quota || "-"} | ${p.activePeriod} Hari | ${formatCurrency.format(p.sellingPrice)}`}
+      </SelectItem>
+    ));
+  }, [filteredProducts, category, formatCurrency]);
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="flex flex-col md:flex-row gap-4">
@@ -299,13 +319,7 @@ export function AddTransaction({
                 />
               </SelectTrigger>
               <SelectContent>
-                {filteredProducts.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {category === "other"
-                      ? `${p.provider} - ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(p.sellingPrice)}`
-                      : `${p.quota || "-"} | ${p.activePeriod} Hari | ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(p.sellingPrice)}`}
-                  </SelectItem>
-                ))}
+                {productOptions}
                 <SelectItem value="manual_input">Input Manual...</SelectItem>
               </SelectContent>
             </Select>
@@ -374,14 +388,10 @@ export function AddTransaction({
           <div className="flex-1 space-y-2">
             <label className="text-sm font-medium">Biaya Admin</label>
             <NumberInput
-              placeholder="Otomatis"
+              placeholder="0"
               value={adminFee}
-              onValueChange={(val) => {
-                if (!["transfer", "withdraw", "e-wallet"].includes(category))
-                  setAdminFee(val);
-              }}
-              readOnly={["transfer", "withdraw", "e-wallet"].includes(category)}
-              className={`transition-colors ${["transfer", "withdraw", "e-wallet"].includes(category) ? "opacity-70 cursor-not-allowed bg-slate-100 dark:bg-neutral-800" : "bg-white dark:bg-slate-950"} border-neutral-700`}
+              onValueChange={setAdminFee}
+              className="bg-white dark:bg-slate-950 border-neutral-200 dark:border-neutral-800"
             />
           </div>
         )}
