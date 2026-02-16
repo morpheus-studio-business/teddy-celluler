@@ -32,6 +32,7 @@ interface TransactionListProps {
   currentPage?: number;
   totalPages?: number;
   onPageChange?: (page: number) => void;
+  onRefresh?: () => void;
   isLoading?: boolean;
 }
 
@@ -40,6 +41,7 @@ export function TransactionList({
   currentPage = 1,
   totalPages = 1,
   onPageChange,
+  onRefresh,
   isLoading = false,
 }: TransactionListProps) {
   const { data: session } = authClient.useSession();
@@ -64,14 +66,14 @@ export function TransactionList({
     if (!deleteId) return;
     await deleteTransaction(deleteId);
     setDeleteId(null);
-    if (onPageChange)
-      onPageChange(currentPage); // Refresh current page
+    if (onRefresh) onRefresh();
+    else if (onPageChange) onPageChange(currentPage);
     else router.refresh();
   };
 
   const handleUpdate = () => {
-    if (onPageChange)
-      onPageChange(currentPage); // Refresh current page
+    if (onRefresh) onRefresh();
+    else if (onPageChange) onPageChange(currentPage);
     else router.refresh();
   };
   const formatRupiah = (number: number) => {

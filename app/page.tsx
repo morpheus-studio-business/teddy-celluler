@@ -39,6 +39,7 @@ export default function Home() {
     setCurrentPage,
     totalPages,
     isLoading,
+    refreshTransactions,
   } = useDashboard();
 
   // Calculate Balances Logic (Reused from Admin Recap)
@@ -263,6 +264,7 @@ export default function Home() {
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={setCurrentPage}
+            onRefresh={refreshTransactions}
             isLoading={isLoading}
           />
         </div>

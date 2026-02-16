@@ -44,8 +44,8 @@ export function LoginRequiredModal({
         className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-sm w-full border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200"
       >
         <div className="p-6 text-center space-y-4">
-          <div className="mx-auto w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center">
-            <LogIn className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+          <div className="mx-auto w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
+            <LogIn className="w-6 h-6 text-slate-900 dark:text-white" />
           </div>
 
           <div className="space-y-2">
@@ -61,7 +61,7 @@ export function LoginRequiredModal({
           <div className="grid gap-3">
             <button
               onClick={() => router.push("/login")}
-              className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-medium transition-colors shadow-lg shadow-purple-900/20"
+              className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 font-medium transition-colors shadow-lg shadow-slate-900/20"
             >
               <LogIn className="w-4 h-4" />
               Masuk
