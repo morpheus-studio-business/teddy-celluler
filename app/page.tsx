@@ -35,6 +35,10 @@ export default function Home() {
     setStartDate,
     endDate,
     setEndDate,
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    isLoading,
   } = useDashboard();
 
   // Calculate Balances Logic (Reused from Admin Recap)
@@ -254,7 +258,13 @@ export default function Home() {
           />
 
           {/* Transaction List */}
-          <TransactionList transactions={filteredTransactions} />
+          <TransactionList
+            transactions={filteredTransactions}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            isLoading={isLoading}
+          />
         </div>
       </div>
     </div>

@@ -29,9 +29,19 @@ import { id } from "date-fns/locale";
 
 interface TransactionListProps {
   transactions: Transaction[];
+  currentPage?: number;
+  totalPages?: number;
+  onPageChange?: (page: number) => void;
+  isLoading?: boolean;
 }
 
-export function TransactionList({ transactions }: TransactionListProps) {
+export function TransactionList({
+  transactions,
+  currentPage = 1,
+  totalPages = 1,
+  onPageChange,
+  isLoading = false,
+}: TransactionListProps) {
   const { data: session } = authClient.useSession();
   const isAdmin = (session?.user as { role?: string })?.role === "admin";
   const router = useRouter();
@@ -54,11 +64,15 @@ export function TransactionList({ transactions }: TransactionListProps) {
     if (!deleteId) return;
     await deleteTransaction(deleteId);
     setDeleteId(null);
-    router.refresh();
+    if (onPageChange)
+      onPageChange(currentPage); // Refresh current page
+    else router.refresh();
   };
 
   const handleUpdate = () => {
-    router.refresh();
+    if (onPageChange)
+      onPageChange(currentPage); // Refresh current page
+    else router.refresh();
   };
   const formatRupiah = (number: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -67,6 +81,14 @@ export function TransactionList({ transactions }: TransactionListProps) {
       maximumFractionDigits: 0,
     }).format(number);
   };
+
+  if (isLoading) {
+    return (
+      <div className="py-12 text-center text-muted-foreground">
+        Memuat data transaksi...
+      </div>
+    );
+  }
 
   if (transactions.length === 0) {
     return (
@@ -245,6 +267,33 @@ export function TransactionList({ transactions }: TransactionListProps) {
           </TableBody>
         </Table>
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between py-4 border-t dark:border-slate-800">
+          <p className="text-sm text-muted-foreground">
+            Halaman {currentPage} dari {totalPages}
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => onPageChange?.(Math.max(1, currentPage - 1))}
+              disabled={currentPage <= 1 || isLoading}
+              className="px-3 py-1 text-sm font-medium rounded-md border bg-white dark:bg-slate-900 dark:border-slate-800 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() =>
+                onPageChange?.(Math.min(totalPages, currentPage + 1))
+              }
+              disabled={currentPage >= totalPages || isLoading}
+              className="px-3 py-1 text-sm font-medium rounded-md border bg-white dark:bg-slate-900 dark:border-slate-800 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
 
       <TransactionModal
         isOpen={isEditOpen}

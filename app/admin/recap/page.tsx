@@ -64,8 +64,8 @@ export default function AdminRecapPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getTransactions().then((data) => {
-      setAllTransactions(data);
+    getTransactions({ limit: 0 }).then((res) => {
+      setAllTransactions(res.data);
       setLoading(false);
     });
   }, []);

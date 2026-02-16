@@ -7,7 +7,7 @@ import {
 
 export function useDashboard() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [dateFilter, setDateFilter] = useState<FilterType>("all");
+  const [dateFilter, setDateFilter] = useState<FilterType>("daily");
   const [categoryFilter, setCategoryFilter] = useState<
     TransactionCategory | "all"
   >("all");
@@ -18,9 +18,40 @@ export function useDashboard() {
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch transactions when filters or page change
+  const fetchTransactions = async () => {
+    setIsLoading(true);
+    try {
+      const response = await getTransactions({
+        page: currentPage,
+        limit: 10,
+        category: categoryFilter,
+        dateFilter,
+        startDate,
+        endDate,
+      });
+      setTransactions(response.data);
+      setTotalPages(response.meta.totalPages);
+    } catch (error) {
+      console.error("Failed to fetch transactions:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    getTransactions().then(setTransactions);
-  }, []);
+    fetchTransactions();
+  }, [currentPage, categoryFilter, dateFilter, startDate, endDate]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [categoryFilter, dateFilter, startDate, endDate]);
 
   const handleAddTransaction = async (data: {
     description: string;
@@ -32,8 +63,8 @@ export function useDashboard() {
     capitalPrice?: number;
     productId?: string;
   }) => {
-    const updated = await addTransaction(data);
-    setTransactions(updated);
+    await addTransaction(data);
+    fetchTransactions(); // Refetch to get latest data
     setIsAddOpen(false);
   };
 
@@ -43,48 +74,9 @@ export function useDashboard() {
     setIsAddOpen(true);
   };
 
-  const filteredTransactions = transactions.filter((t) => {
-    // Category Filter
-    if (categoryFilter !== "all" && t.category !== categoryFilter) return false;
-
-    // Date Filter
-    const date = new Date(t.date);
-    const now = new Date();
-    if (dateFilter === "daily") {
-      return (
-        date.getDate() === now.getDate() &&
-        date.getMonth() === now.getMonth() &&
-        date.getFullYear() === now.getFullYear()
-      );
-    }
-    if (dateFilter === "weekly") {
-      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      return date >= oneWeekAgo;
-    }
-    if (dateFilter === "monthly") {
-      return (
-        date.getMonth() === now.getMonth() &&
-        date.getFullYear() === now.getFullYear()
-      );
-    }
-    if (dateFilter === "yearly") {
-      return date.getFullYear() === now.getFullYear();
-    }
-    if (dateFilter === "custom") {
-      if (startDate) {
-        const start = new Date(startDate);
-        start.setHours(0, 0, 0, 0);
-        if (date < start) return false;
-      }
-      if (endDate) {
-        const end = new Date(endDate);
-        end.setHours(23, 59, 59, 999);
-        if (date > end) return false;
-      }
-      return true;
-    }
-    return true;
-  });
+  // For compatibility with existing components that might expect "filteredTransactions"
+  // In server-side pagination, "transactions" IS the filtered list for the current page.
+  const filteredTransactions = transactions;
 
   return {
     transactions,
@@ -103,5 +95,10 @@ export function useDashboard() {
     setStartDate,
     endDate,
     setEndDate,
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    isLoading,
+    refreshTransactions: fetchTransactions,
   };
 }

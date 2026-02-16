@@ -2,16 +2,82 @@
 
 import { db } from "@/db";
 import { transactions } from "@/db/schema";
-import { desc } from "drizzle-orm";
-import { TransactionCategory } from "@/types";
+import { desc, eq, and, gte, lte, count } from "drizzle-orm";
+import { TransactionCategory, FilterType } from "@/types";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
-export async function getTransactions() {
-  const rows = await db
+export async function getTransactions(
+  params: {
+    page?: number;
+    limit?: number;
+    category?: TransactionCategory | "all";
+    dateFilter?: FilterType;
+    startDate?: string;
+    endDate?: string;
+  } = {},
+) {
+  const page = params.page || 1;
+  const limit = params.limit ?? 10; // Use nullish coalescing to allow 0
+  const offset = (page - 1) * limit;
+
+  // Build where conditions
+  const conditions = [];
+
+  // Category Filter
+  if (params.category && params.category !== "all") {
+    conditions.push(eq(transactions.category, params.category));
+  }
+
+  // Date Filter
+  const now = new Date();
+  if (params.dateFilter === "daily") {
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+    conditions.push(gte(transactions.date, today));
+  } else if (params.dateFilter === "weekly") {
+    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    conditions.push(gte(transactions.date, oneWeekAgo));
+  } else if (params.dateFilter === "monthly") {
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    conditions.push(gte(transactions.date, startOfMonth));
+  } else if (params.dateFilter === "yearly") {
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+    conditions.push(gte(transactions.date, startOfYear));
+  } else if (params.dateFilter === "custom") {
+    if (params.startDate) {
+      const start = new Date(params.startDate);
+      start.setHours(0, 0, 0, 0);
+      conditions.push(gte(transactions.date, start));
+    }
+    if (params.endDate) {
+      const end = new Date(params.endDate);
+      end.setHours(23, 59, 59, 999);
+      conditions.push(lte(transactions.date, end));
+    }
+  }
+
+  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+  // Get total count
+  const [totalResult] = await db
+    .select({ count: count() })
+    .from(transactions)
+    .where(whereClause);
+  const total = totalResult.count;
+  const totalPages = limit > 0 ? Math.ceil(total / limit) : 1;
+
+  // Get data
+  const baseQuery = db
     .select()
     .from(transactions)
+    .where(whereClause)
     .orderBy(desc(transactions.date));
 
-  return rows.map((r) => ({
+  const rows =
+    limit > 0 ? await baseQuery.limit(limit).offset(offset) : await baseQuery;
+
+  const data = rows.map((r) => ({
     id: r.id,
     date: r.date.toISOString(),
     description: r.description,
@@ -24,12 +90,17 @@ export async function getTransactions() {
     capitalPrice: r.capitalPrice,
     productId: r.productId,
   }));
+
+  return {
+    data,
+    meta: {
+      total,
+      totalPages,
+      page,
+      limit,
+    },
+  };
 }
-
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-
-// ...
 
 export async function addTransaction(data: {
   description: string;
@@ -60,10 +131,9 @@ export async function addTransaction(data: {
     capitalPrice: data.capitalPrice || 0,
     productId: data.productId,
   });
-  return await getTransactions();
-}
 
-import { eq } from "drizzle-orm";
+  return { success: true };
+}
 
 export async function updateTransaction(data: {
   id: string;
@@ -94,7 +164,7 @@ export async function updateTransaction(data: {
     })
     .where(eq(transactions.id, data.id));
 
-  return await getTransactions();
+  return { success: true };
 }
 
 export async function deleteTransaction(id: string) {
@@ -108,5 +178,5 @@ export async function deleteTransaction(id: string) {
 
   await db.delete(transactions).where(eq(transactions.id, id));
 
-  return await getTransactions();
+  return { success: true };
 }
