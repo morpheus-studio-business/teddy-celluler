@@ -117,6 +117,7 @@ export function useDashboard() {
     setCurrentPage,
     totalPages,
     isLoading,
+    refreshTransactions: fetchTransactions,
     stats,
   };
 }
