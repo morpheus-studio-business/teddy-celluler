@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   webDir: "out",
   server: {
     androidScheme: "https",
-    url: "http://192.168.1.3:3000",
+    url: "https://celluler.morpheus-studio.pro",
     cleartext: true,
   },
 };
