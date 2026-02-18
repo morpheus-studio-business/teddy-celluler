@@ -124,12 +124,34 @@ export default function Home() {
 
       // Group by Category
       const groupedTransactions: Record<string, Transaction[]> = {};
+
+      const getCategoryLabel = (cat: string) => {
+        const labels: Record<string, string> = {
+          data_package: "Paket Data",
+          withdraw: "Tarik Tunai",
+          general: "Umum",
+          transfer: "Transfer",
+          "e-wallet": "E-Wallet",
+          voucher: "Voucher",
+          accessories: "Aksesoris",
+          service: "Service",
+          income: "Pemasukan",
+          expense: "Pengeluaran",
+          pulsa: "Pulsa",
+          perdana: "Perdana",
+        };
+        return labels[cat] || cat.charAt(0).toUpperCase() + cat.slice(1);
+      };
+
       allTransactions.forEach((t) => {
-        const cat = t.category || "Lainnya";
-        if (!groupedTransactions[cat]) {
-          groupedTransactions[cat] = [];
+        // Use the label for grouping so "Paket Data" is the key
+        const rawCat = t.category || "Lainnya";
+        const catLabel = getCategoryLabel(rawCat);
+
+        if (!groupedTransactions[catLabel]) {
+          groupedTransactions[catLabel] = [];
         }
-        groupedTransactions[cat].push(t as Transaction);
+        groupedTransactions[catLabel].push(t as Transaction);
       });
 
       // Render Tables by Group
@@ -187,7 +209,7 @@ export default function Home() {
           });
 
           // Create space for next table
-          // @ts-ignore
+          // @ts-expect-error - autotable adds this property
           yPos = doc.lastAutoTable.finalY + 10;
         });
       }
