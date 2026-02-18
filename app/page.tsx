@@ -180,7 +180,9 @@ export default function Home() {
             margin: { top: 20 },
             didDrawPage: (data) => {
               // If table splits across pages, update yPos for next loop
-              yPos = data.cursor.y;
+              if (data.cursor) {
+                yPos = data.cursor.y;
+              }
             },
           });
 
