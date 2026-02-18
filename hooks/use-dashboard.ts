@@ -3,6 +3,7 @@ import { FilterType, Transaction, TransactionCategory } from "@/types";
 import {
   getTransactions,
   addTransaction,
+  getTransactionStats,
 } from "@/app/actions/transaction-actions";
 
 export function useDashboard() {
@@ -22,21 +23,38 @@ export function useDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [stats, setStats] = useState({
+    totalIncome: 0,
+    totalExpense: 0,
+    previousBalance: 0,
+    currentPeriodBalance: 0,
+    totalEndingBalance: 0,
+  });
 
   // Fetch transactions when filters or page change
   const fetchTransactions = async () => {
     setIsLoading(true);
     try {
-      const response = await getTransactions({
-        page: currentPage,
-        limit: 10,
-        category: categoryFilter,
-        dateFilter,
-        startDate,
-        endDate,
-      });
-      setTransactions(response.data);
-      setTotalPages(response.meta.totalPages);
+      const [transactionRes, statsRes] = await Promise.all([
+        getTransactions({
+          page: currentPage,
+          limit: 10,
+          category: categoryFilter,
+          dateFilter,
+          startDate,
+          endDate,
+        }),
+        getTransactionStats({
+          category: categoryFilter,
+          dateFilter,
+          startDate,
+          endDate,
+        }),
+      ]);
+
+      setTransactions(transactionRes.data);
+      setTotalPages(transactionRes.meta.totalPages);
+      setStats(statsRes);
     } catch (error) {
       console.error("Failed to fetch transactions:", error);
     } finally {
@@ -99,6 +117,6 @@ export function useDashboard() {
     setCurrentPage,
     totalPages,
     isLoading,
-    refreshTransactions: fetchTransactions,
+    stats,
   };
 }

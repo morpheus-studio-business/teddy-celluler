@@ -7,19 +7,20 @@ import { useDashboard } from "@/hooks/use-dashboard";
 
 import { authClient } from "@/lib/auth-client";
 import { LoginRequiredModal } from "@/components/dashboard/LoginRequiredModal";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { TransactionModal } from "@/components/dashboard/TransactionModal";
 import { TransactionFilters } from "@/components/dashboard/TransactionFilters";
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { getTransactions } from "@/app/actions/transaction-actions";
+import { Transaction } from "@/types";
 
 export default function Home() {
   const { data: session } = authClient.useSession();
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   const {
-    transactions,
     filteredTransactions,
     isAddOpen,
     setIsAddOpen,
@@ -40,71 +41,18 @@ export default function Home() {
     totalPages,
     isLoading,
     refreshTransactions,
+    stats,
   } = useDashboard();
 
-  // Calculate Balances Logic (Reused from Admin Recap)
-  const cutoffDate = useMemo(() => {
-    const now = new Date();
-    if (dateFilter === "daily") {
-      const d = new Date(now);
-      d.setHours(0, 0, 0, 0);
-      return d;
-    }
-    if (dateFilter === "weekly") {
-      return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    }
-    if (dateFilter === "monthly") {
-      return new Date(now.getFullYear(), now.getMonth(), 1);
-    }
-    if (dateFilter === "yearly") {
-      return new Date(now.getFullYear(), 0, 1);
-    }
-    if (dateFilter === "custom" && startDate) {
-      const d = new Date(startDate);
-      d.setHours(0, 0, 0, 0);
-      return d;
-    }
-    return null; // All time
-  }, [dateFilter, startDate]);
+  const {
+    totalIncome,
+    totalExpense,
+    previousBalance,
+    currentPeriodBalance,
+    totalEndingBalance,
+  } = stats;
 
-  const previousBalance = useMemo(() => {
-    if (!cutoffDate) return 0;
-
-    return transactions
-      .filter((t) => {
-        // Apply Category Filter if needed (usually Balance is global, but let's respect the user's category filter if set)
-        if (categoryFilter !== "all" && t.category !== categoryFilter)
-          return false;
-
-        const tDate = new Date(t.date);
-        return tDate < cutoffDate;
-      })
-      .reduce((acc, t) => {
-        if (t.type === "income") return acc + t.total;
-        return acc - t.total;
-      }, 0);
-  }, [transactions, categoryFilter, cutoffDate]);
-
-  const totalIncome = useMemo(
-    () =>
-      filteredTransactions
-        .filter((t) => t.type === "income")
-        .reduce((sum, t) => sum + t.total, 0),
-    [filteredTransactions],
-  );
-
-  const totalExpense = useMemo(
-    () =>
-      filteredTransactions
-        .filter((t) => t.type === "expense")
-        .reduce((sum, t) => sum + t.total, 0),
-    [filteredTransactions],
-  );
-
-  const currentPeriodBalance = totalIncome - totalExpense;
-  const totalEndingBalance = previousBalance + currentPeriodBalance;
-
-  const handleSharePdf = () => {
+  const handleSharePdf = async () => {
     const doc = new jsPDF();
 
     const formatCurrency = (val: number) =>
@@ -163,43 +111,108 @@ export default function Home() {
     yPos += 10;
     doc.setFont("helvetica", "normal");
 
-    // Table
-    const tableData = filteredTransactions.map((t, idx) => [
-      idx + 1,
-      formatDate(t.date),
-      t.category,
-      t.description,
-      formatCurrency(t.amount),
-      formatCurrency(t.total),
-    ]);
+    // Fetch ALL Transactions for PDF
+    try {
+      const response = await getTransactions({
+        limit: 0, // Fetch all
+        category: categoryFilter,
+        dateFilter,
+        startDate,
+        endDate,
+      });
+      const allTransactions = response.data;
 
-    autoTable(doc, {
-      head: [["No", "Tanggal", "Kategori", "Keterangan", "Nominal", "Total"]],
-      body: tableData,
-      startY: yPos,
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [15, 23, 42] },
-    });
+      // Group by Category
+      const groupedTransactions: Record<string, Transaction[]> = {};
+      allTransactions.forEach((t) => {
+        const cat = t.category || "Lainnya";
+        if (!groupedTransactions[cat]) {
+          groupedTransactions[cat] = [];
+        }
+        groupedTransactions[cat].push(t as Transaction);
+      });
 
-    const pdfBlob = doc.output("blob");
-    const file = new File([pdfBlob], "laporan_transaksi.pdf", {
-      type: "application/pdf",
-    });
+      // Render Tables by Group
+      const categories = Object.keys(groupedTransactions).sort();
 
-    if (
-      navigator.share &&
-      navigator.canShare &&
-      navigator.canShare({ files: [file] })
-    ) {
-      navigator
-        .share({
-          files: [file],
-          title: "Laporan Transaksi",
-          text: "Berikut adalah laporan transaksi.",
-        })
-        .catch((error) => console.log("Sharing failed", error));
-    } else {
-      doc.save("laporan_transaksi.pdf");
+      if (categories.length === 0) {
+        doc.text("Tidak ada transaksi untuk periode ini.", 14, yPos);
+      } else {
+        categories.forEach((cat) => {
+          const transactions = groupedTransactions[cat];
+
+          // Group Header
+          if (yPos > 270) {
+            // Page break check if near bottom
+            doc.addPage();
+            yPos = 20;
+          }
+
+          // Calculate Category Subtotal
+          const subtotal = transactions.reduce((acc, t) => {
+            return t.type === "income" ? acc + t.total : acc - t.total;
+          }, 0);
+
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(10);
+          doc.text(
+            `${cat.toUpperCase()} (Total: ${formatCurrency(subtotal)})`,
+            14,
+            yPos,
+          );
+          yPos += 2; // Spacing before table
+
+          const tableData = transactions.map((t, idx) => [
+            idx + 1,
+            formatDate(t.date),
+            t.description,
+            t.type === "income" ? "Masuk" : "Keluar",
+            formatCurrency(t.amount),
+            formatCurrency(t.total),
+          ]);
+
+          autoTable(doc, {
+            head: [["No", "Tanggal", "Keterangan", "Tipe", "Nominal", "Total"]],
+            body: tableData,
+            startY: yPos,
+            styles: { fontSize: 8 },
+            headStyles: { fillColor: [15, 23, 42] },
+            margin: { top: 20 },
+            didDrawPage: (data) => {
+              // If table splits across pages, update yPos for next loop
+              yPos = data.cursor.y;
+            },
+          });
+
+          // Create space for next table
+          // @ts-ignore
+          yPos = doc.lastAutoTable.finalY + 10;
+        });
+      }
+
+      const pdfBlob = doc.output("blob");
+      const file = new File([pdfBlob], "laporan_transaksi.pdf", {
+        type: "application/pdf",
+      });
+
+      if (
+        navigator.share &&
+        navigator.canShare &&
+        navigator.canShare({ files: [file] })
+      ) {
+        navigator
+          .share({
+            files: [file],
+            title: "Laporan Transaksi",
+            text: "Berikut adalah laporan transaksi.",
+          })
+          .catch((error) => console.log("Sharing failed", error));
+      } else {
+        doc.save("laporan_transaksi.pdf");
+      }
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      alert("Gagal membuat PDF. Silakan coba lagi.");
     }
   };
 
