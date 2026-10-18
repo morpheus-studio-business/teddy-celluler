@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Select,
   SelectContent,
@@ -9,8 +9,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { NumberInput } from "@/components/ui/number-input";
-import { Loader2, Plus } from "lucide-react";
-import { createProduct } from "@/app/actions/products";
+import { Loader2, Plus, Save } from "lucide-react";
+import { createProduct, updateProduct } from "@/app/actions/products";
 
 const PROVIDERS = [
   "Telkomsel",
@@ -35,27 +35,70 @@ const ACTIVE_PERIODS = [
   { label: "90 Hari", value: 90 },
 ];
 
+export interface ProductInitialData {
+  id: string;
+  provider: string;
+  quota: string | null;
+  activePeriod: number;
+  capitalPrice: number;
+  sellingPrice: number;
+}
+
 interface ProductEntryFormProps {
   category: "voucher" | "paket_data" | "pulsa" | "other";
-  title: string;
+  title?: string;
   onSuccess?: () => void;
+  initialData?: ProductInitialData | null;
 }
 
 export function ProductEntryForm({
   category,
   onSuccess,
+  initialData,
 }: ProductEntryFormProps) {
+  const isEditing = !!initialData;
+
+  const providerList = useMemo(() => {
+    if (initialData?.provider && !PROVIDERS.includes(initialData.provider)) {
+      return [initialData.provider, ...PROVIDERS];
+    }
+    return PROVIDERS;
+  }, [initialData?.provider]);
+
+  const standardDays = ACTIVE_PERIODS.map((p) => p.value);
+  const initialIsStandard = initialData
+    ? standardDays.includes(initialData.activePeriod)
+    : true;
+
   const [provider, setProvider] = useState(
-    category === "other" ? "" : PROVIDERS[0],
+    initialData
+      ? initialData.provider
+      : category === "other"
+        ? ""
+        : PROVIDERS[0],
   );
-  const [quota, setQuota] = useState("");
+  const [quota, setQuota] = useState(
+    initialData?.quota && initialData.quota !== "-" ? initialData.quota : "",
+  );
   const [activeDays, setActiveDays] = useState(
-    ACTIVE_PERIODS[5].value.toString(),
+    initialData && initialIsStandard
+      ? initialData.activePeriod.toString()
+      : ACTIVE_PERIODS[5].value.toString(),
   ); // Default 28 days
-  const [useCustomDays, setUseCustomDays] = useState(false);
-  const [customDays, setCustomDays] = useState("");
-  const [capitalPrice, setCapitalPrice] = useState("");
-  const [sellingPrice, setSellingPrice] = useState("");
+  const [useCustomDays, setUseCustomDays] = useState(
+    initialData ? !initialIsStandard && initialData.activePeriod > 0 : false,
+  );
+  const [customDays, setCustomDays] = useState(
+    initialData && !initialIsStandard
+      ? initialData.activePeriod.toString()
+      : "",
+  );
+  const [capitalPrice, setCapitalPrice] = useState(
+    initialData ? initialData.capitalPrice.toString() : "",
+  );
+  const [sellingPrice, setSellingPrice] = useState(
+    initialData ? initialData.sellingPrice.toString() : "",
+  );
   const [isPending, setIsPending] = useState(false);
 
   // Calculate profit
@@ -80,34 +123,46 @@ export function ProductEntryForm({
 
     setIsPending(true);
 
-    const result = await createProduct({
-      category:
-        category === "paket_data"
-          ? "data_package"
-          : category === "pulsa"
-            ? "pulsa"
-            : category === "other"
-              ? "other"
-              : "voucher",
-      provider,
-      quota: category === "other" ? "-" : quota, // Default quota for other
-      activePeriod:
-        category === "pulsa" || category === "other"
-          ? 0
-          : useCustomDays
-            ? parseInt(customDays)
-            : parseInt(activeDays),
-      capitalPrice: modal,
-      sellingPrice: jual,
-    });
+    const mappedCategory =
+      category === "paket_data"
+        ? "data_package"
+        : category === "pulsa"
+          ? "pulsa"
+          : category === "other"
+            ? "other"
+            : "voucher";
+
+    const period =
+      category === "pulsa" || category === "other"
+        ? 0
+        : useCustomDays
+          ? parseInt(customDays) || 0
+          : parseInt(activeDays) || 0;
+
+    const result = isEditing
+      ? await updateProduct({
+          id: initialData.id,
+          category: mappedCategory,
+          provider,
+          quota: category === "other" ? "-" : quota,
+          activePeriod: period,
+          capitalPrice: modal,
+          sellingPrice: jual,
+        })
+      : await createProduct({
+          category: mappedCategory,
+          provider,
+          quota: category === "other" ? "-" : quota,
+          activePeriod: period,
+          capitalPrice: modal,
+          sellingPrice: jual,
+        });
 
     setIsPending(false);
 
     if (result.success) {
-      if (category === "other") setProvider("");
-      setQuota("");
-      // setCapitalPrice("");
-      // setSellingPrice("");
+      if (category === "other" && !isEditing) setProvider("");
+      if (!isEditing) setQuota("");
       if (onSuccess) onSuccess();
     } else {
       alert(`Gagal menyimpan: ${result.error}`);
@@ -140,7 +195,7 @@ export function ProductEntryForm({
               <SelectValue placeholder="Pilih Provider" />
             </SelectTrigger>
             <SelectContent>
-              {PROVIDERS.map((p) => (
+              {providerList.map((p) => (
                 <SelectItem key={p} value={p}>
                   {p}
                 </SelectItem>
@@ -283,6 +338,11 @@ export function ProductEntryForm({
       >
         {isPending ? (
           <Loader2 className="h-4 w-4 animate-spin" />
+        ) : isEditing ? (
+          <>
+            <Save className="h-4 w-4" />
+            Simpan Perubahan
+          </>
         ) : (
           <>
             <Plus className="h-4 w-4" />

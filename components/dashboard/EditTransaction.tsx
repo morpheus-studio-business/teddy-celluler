@@ -97,10 +97,13 @@ export function EditTransaction({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="transfer">Transfer</SelectItem>
+              <SelectItem value="e-wallet">E-Wallet</SelectItem>
               <SelectItem value="voucher">Voucher</SelectItem>
               <SelectItem value="data_package">Paket Data</SelectItem>
               <SelectItem value="pulsa">Pulsa</SelectItem>
               <SelectItem value="withdraw">Tarik Tunai</SelectItem>
+              <SelectItem value="other">Aksesoris</SelectItem>
+              <SelectItem value="general">Lainnya</SelectItem>
             </SelectContent>
           </Select>
         </div>

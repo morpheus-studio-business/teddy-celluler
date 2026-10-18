@@ -74,3 +74,44 @@ export async function deleteProduct(id: string) {
     return { success: false, error: "Failed to delete product" };
   }
 }
+
+export interface UpdateProductParams {
+  id: string;
+  category: "voucher" | "data_package" | "pulsa" | "other";
+  provider: string;
+  quota?: string;
+  activePeriod: number;
+  capitalPrice: number;
+  sellingPrice: number;
+}
+
+export async function updateProduct(params: UpdateProductParams) {
+  try {
+    await db
+      .update(products)
+      .set({
+        provider: params.provider,
+        quota: params.quota,
+        activePeriod: params.activePeriod,
+        capitalPrice: params.capitalPrice,
+        sellingPrice: params.sellingPrice,
+        updatedAt: new Date(),
+      })
+      .where(eq(products.id, params.id));
+
+    revalidatePath("/admin/voucher");
+    revalidatePath("/admin/paket-data");
+    revalidatePath("/admin/pulsa");
+    revalidatePath("/admin/aksesoris");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to update product:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "Failed to update product",
+    };
+  }
+}
+

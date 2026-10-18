@@ -129,7 +129,8 @@ export default function Home() {
         const labels: Record<string, string> = {
           data_package: "Paket Data",
           withdraw: "Tarik Tunai",
-          general: "Umum",
+          general: "Lainnya",
+          other: "Aksesoris",
           transfer: "Transfer",
           "e-wallet": "E-Wallet",
           voucher: "Voucher",

@@ -16,6 +16,7 @@ import {
   CreditCard,
   Smartphone,
   ChevronDown,
+  Pencil,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -50,6 +51,7 @@ interface ProductManagerProps {
 export function ProductManager({ category, title }: ProductManagerProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [initialLoading, setInitialLoading] = useState(true);
   const [activeProvider, setActiveProvider] = useState("Semua");
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -101,8 +103,19 @@ export function ProductManager({ category, title }: ProductManagerProps) {
     }
   };
 
+  const handleEditClick = (product: Product) => {
+    setEditingProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const handleAddNew = () => {
+    setEditingProduct(null);
+    setIsModalOpen(true);
+  };
+
   const onSuccess = () => {
     setIsModalOpen(false);
+    setEditingProduct(null);
     fetchProducts();
   };
 
@@ -125,7 +138,7 @@ export function ProductManager({ category, title }: ProductManagerProps) {
           </p>
         </div>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={handleAddNew}
           className="flex items-center justify-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 rounded-lg text-sm font-medium transition-colors w-full sm:w-auto"
         >
           <Plus className="h-4 w-4" />
@@ -289,12 +302,22 @@ export function ProductManager({ category, title }: ProductManagerProps) {
                       )}
                     </p>
                   </div>
-                  <button
-                    onClick={() => handleDeleteClick(product.id)}
-                    className="p-2 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors shrink-0"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      onClick={() => handleEditClick(product)}
+                      className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors"
+                      title="Edit Produk"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteClick(product.id)}
+                      className="p-2 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                      title="Hapus Produk"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -304,11 +327,15 @@ export function ProductManager({ category, title }: ProductManagerProps) {
 
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={`Tambah ${title}`}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingProduct(null);
+        }}
+        title={editingProduct ? `Edit ${title}` : `Tambah ${title}`}
       >
         <div className="max-h-[70vh] overflow-y-auto px-1">
           <ProductEntryForm
+            key={editingProduct?.id || "new"}
             category={
               category === "data_package"
                 ? "paket_data"
@@ -319,6 +346,7 @@ export function ProductManager({ category, title }: ProductManagerProps) {
                     : category
             }
             title=""
+            initialData={editingProduct}
             onSuccess={onSuccess}
           />
         </div>

@@ -99,7 +99,9 @@ export function TransactionFilters({
                             ? "E-Wallet"
                             : categoryFilter === "other"
                               ? "Aksesoris"
-                              : "Semua Tipe"}
+                              : categoryFilter === "general"
+                                ? "Lainnya"
+                                : "Semua Tipe"}
               </span>
             </Button>
           </DropdownMenuTrigger>
