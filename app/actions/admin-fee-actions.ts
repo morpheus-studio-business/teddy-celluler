@@ -40,6 +40,25 @@ export async function deleteAdminFeeRule(id: string) {
   return await getAdminFeeRules();
 }
 
+export async function updateAdminFeeRule(rule: {
+  id: string;
+  category: "transfer" | "withdraw" | "e-wallet";
+  minAmount: number;
+  maxAmount: number;
+  adminFee: number;
+}) {
+  await db
+    .update(adminFeeRules)
+    .set({
+      minAmount: rule.minAmount,
+      maxAmount: rule.maxAmount,
+      adminFee: rule.adminFee,
+    })
+    .where(eq(adminFeeRules.id, rule.id));
+  return await getAdminFeeRules();
+}
+
+
 export async function findAdminFee(
   category: "transfer" | "withdraw" | "e-wallet",
   amount: number,

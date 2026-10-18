@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Pencil, Save } from "lucide-react";
 import { AdminFeeRule } from "@/types";
 import {
   getAdminFeeRules,
   addAdminFeeRule,
+  updateAdminFeeRule,
   deleteAdminFeeRule,
 } from "@/app/actions/admin-fee-actions";
 import { NumberInput } from "@/components/ui/number-input";
@@ -28,6 +29,7 @@ interface FeeRulesEditorProps {
 
 export function FeeRulesEditor({ category, title }: FeeRulesEditorProps) {
   const [rules, setRules] = useState<AdminFeeRule[]>([]);
+  const [editingRule, setEditingRule] = useState<AdminFeeRule | null>(null);
   const [minAmount, setMinAmount] = useState("");
   const [maxAmount, setMaxAmount] = useState("");
   const [adminFee, setAdminFee] = useState("");
@@ -47,21 +49,56 @@ export function FeeRulesEditor({ category, title }: FeeRulesEditorProps) {
     });
   }, [category]);
 
-  const handleAdd = async () => {
+  const handleOpenAdd = () => {
+    setEditingRule(null);
+    setMinAmount("");
+    setMaxAmount("");
+    setAdminFee("");
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (rule: AdminFeeRule) => {
+    setEditingRule(rule);
+    setMinAmount(rule.minAmount.toString());
+    setMaxAmount(rule.maxAmount.toString());
+    setAdminFee(rule.adminFee.toString());
+    setIsModalOpen(true);
+  };
+
+  const handleSave = async () => {
     const min = parseFloat(minAmount);
     const max = parseFloat(maxAmount);
     const fee = parseFloat(adminFee);
 
-    if (isNaN(min) || isNaN(max) || isNaN(fee)) return;
-    if (min > max) return;
+    if (isNaN(min) || isNaN(max) || isNaN(fee)) {
+      alert("Mohon lengkapi semua nominal dengan benar");
+      return;
+    }
+    if (min > max) {
+      alert("Nominal Minimum tidak boleh lebih besar dari Nominal Maksimum");
+      return;
+    }
 
-    const updated = await addAdminFeeRule({
-      category,
-      minAmount: min,
-      maxAmount: max,
-      adminFee: fee,
-    });
-    setRules(updated.filter((r) => r.category === category));
+    if (editingRule) {
+      const updated = await updateAdminFeeRule({
+        id: editingRule.id,
+        category,
+        minAmount: min,
+        maxAmount: max,
+        adminFee: fee,
+      });
+      setRules(updated.filter((r) => r.category === category));
+    } else {
+      const updated = await addAdminFeeRule({
+        category,
+        minAmount: min,
+        maxAmount: max,
+        adminFee: fee,
+      });
+      setRules(updated.filter((r) => r.category === category));
+    }
+
+    setEditingRule(null);
     setMinAmount("");
     setMaxAmount("");
     setAdminFee("");
@@ -83,7 +120,6 @@ export function FeeRulesEditor({ category, title }: FeeRulesEditorProps) {
   return (
     <div className="space-y-6">
       {/* Title */}
-      {/* Title */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">
@@ -95,7 +131,7 @@ export function FeeRulesEditor({ category, title }: FeeRulesEditorProps) {
           </p>
         </div>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={handleOpenAdd}
           className="flex items-center justify-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 rounded-lg text-sm font-medium transition-colors w-full sm:w-auto"
         >
           <Plus className="h-4 w-4" />
@@ -103,11 +139,14 @@ export function FeeRulesEditor({ category, title }: FeeRulesEditorProps) {
         </button>
       </div>
 
-      {/* Add Rule Modal */}
+      {/* Add / Edit Rule Modal */}
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Tambah Aturan Baru"
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingRule(null);
+        }}
+        title={editingRule ? "Edit Aturan Biaya" : "Tambah Aturan Baru"}
       >
         <div className="flex flex-col gap-4">
           <div className="space-y-4">
@@ -145,11 +184,20 @@ export function FeeRulesEditor({ category, title }: FeeRulesEditorProps) {
               />
             </div>
             <button
-              onClick={handleAdd}
+              onClick={handleSave}
               className="w-full py-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 text-sm font-medium shadow-lg shadow-slate-900/20 transition-all hover:shadow-slate-900/30 active:scale-[0.98] flex items-center justify-center gap-2 mt-2"
             >
-              <Plus className="h-4 w-4" />
-              Tambah Aturan
+              {editingRule ? (
+                <>
+                  <Save className="h-4 w-4" />
+                  Simpan Perubahan
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4" />
+                  Tambah Aturan
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -185,7 +233,7 @@ export function FeeRulesEditor({ category, title }: FeeRulesEditorProps) {
                     <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                       Biaya Admin
                     </th>
-                    <th className="text-right px-5 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-20">
+                    <th className="text-right px-5 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-24">
                       Aksi
                     </th>
                   </tr>
@@ -209,13 +257,22 @@ export function FeeRulesEditor({ category, title }: FeeRulesEditorProps) {
                         </span>
                       </td>
                       <td className="px-5 py-3 text-right">
-                        <button
-                          onClick={() => handleDeleteClick(rule.id)}
-                          className="p-1.5 rounded-lg text-rose-500 hover:bg-red-50 dark:hover:bg-rose-950/30 transition-colors"
-                          title="Hapus"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={() => handleOpenEdit(rule)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors"
+                            title="Edit Aturan"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteClick(rule.id)}
+                            className="p-1.5 rounded-lg text-rose-500 hover:bg-red-50 dark:hover:bg-rose-950/30 transition-colors"
+                            title="Hapus"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -255,13 +312,22 @@ export function FeeRulesEditor({ category, title }: FeeRulesEditorProps) {
                         {formatCurrency(rule.adminFee)}
                       </span>
                     </div>
-                    <button
-                      onClick={() => handleDeleteClick(rule.id)}
-                      className="p-2 rounded-lg text-rose-500 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-950/40 transition-colors self-end"
-                      title="Hapus"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => handleOpenEdit(rule)}
+                        className="p-2 rounded-lg text-blue-600 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/20 dark:hover:bg-blue-950/40 transition-colors self-end"
+                        title="Edit Aturan"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(rule.id)}
+                        className="p-2 rounded-lg text-rose-500 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-950/40 transition-colors self-end"
+                        title="Hapus"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
