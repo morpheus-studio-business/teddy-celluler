@@ -136,3 +136,30 @@ export const storeSettings = pgTable("store_settings", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+export const accountTypeEnum = pgEnum("account_type", ["bank", "ewallet"]);
+
+export const financialAccounts = pgTable("financial_accounts", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  type: accountTypeEnum("type").notNull().default("bank"),
+  accountNumber: text("account_number"),
+  holderName: text("holder_name"),
+  currentBalance: integer("current_balance").notNull().default(0),
+  lastUpdatedBy: text("last_updated_by"),
+  lastUpdatedAt: timestamp("last_updated_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+});
+
+export const balanceLogs = pgTable("balance_logs", {
+  id: text("id").primaryKey(),
+  accountId: text("account_id")
+    .notNull()
+    .references(() => financialAccounts.id, { onDelete: "cascade" }),
+  amount: integer("amount").notNull(),
+  notes: text("notes"),
+  userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
+  userName: text("user_name").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});

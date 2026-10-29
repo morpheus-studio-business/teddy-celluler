@@ -10,6 +10,7 @@ import { LoginRequiredModal } from "@/components/dashboard/LoginRequiredModal";
 import { useState } from "react";
 import { TransactionModal } from "@/components/dashboard/TransactionModal";
 import { TransactionFilters } from "@/components/dashboard/TransactionFilters";
+import { DockBar } from "@/components/dashboard/DockBar";
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -242,7 +243,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-brand-dark pb-20 font-sans selection:bg-blue-100 selection:text-blue-900">
+    <div className="min-h-screen bg-slate-50 dark:bg-brand-dark pb-32 font-sans selection:bg-blue-100 selection:text-blue-900">
       <DashboardHeader
         totalBalance={totalEndingBalance}
         previousBalance={previousBalance}
@@ -307,6 +308,18 @@ export default function Home() {
           />
         </div>
       </div>
+
+      {/* Modern Floating Dockbar */}
+      <DockBar
+        onAddTransaction={(category) => {
+          if (!session) {
+            setShowLoginModal(true);
+            return;
+          }
+          const mode = category === "withdraw" ? "expense" : "income";
+          openAddModal(mode);
+        }}
+      />
     </div>
   );
 }

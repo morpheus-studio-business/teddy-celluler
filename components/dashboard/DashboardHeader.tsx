@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { SummaryStats } from "@/components/dashboard/SummaryStats";
 import { QuickButtons } from "@/components/dashboard/QuickButtons";
-import { HamburgerMenu } from "@/components/dashboard/HamburgerMenu";
 import { TransactionCategory } from "@/types";
 
 interface DashboardHeaderProps {
@@ -43,7 +42,6 @@ export function DashboardHeader({
               Financial Dashboard
             </p>
           </div>
-          <HamburgerMenu />
         </div>
         <SummaryStats
           totalBalance={totalBalance}

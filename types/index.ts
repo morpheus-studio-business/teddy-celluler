@@ -62,3 +62,30 @@ export interface Product {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type AccountType = "bank" | "ewallet";
+
+export interface FinancialAccount {
+  id: string;
+  name: string;
+  type: AccountType;
+  accountNumber?: string | null;
+  holderName?: string | null;
+  currentBalance: number;
+  lastUpdatedBy?: string | null;
+  lastUpdatedAt?: string | null;
+  createdAt?: string | Date;
+  isActive: boolean;
+}
+
+export interface BalanceLog {
+  id: string;
+  accountId: string;
+  accountName?: string;
+  accountType?: AccountType;
+  amount: number;
+  notes?: string | null;
+  userId?: string | null;
+  userName: string;
+  createdAt: string | Date;
+}

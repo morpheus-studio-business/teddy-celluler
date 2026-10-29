@@ -17,6 +17,7 @@ import {
   Smartphone,
   Wallet,
   Package,
+  Landmark,
 } from "lucide-react";
 
 const menuItems = [
@@ -24,6 +25,12 @@ const menuItems = [
     label: "Rekap",
     href: "/admin/recap",
     icon: ClipboardList,
+    active: true,
+  },
+  {
+    label: "Saldo Kas & Bank",
+    href: "/admin/saldo",
+    icon: Landmark,
     active: true,
   },
   {
