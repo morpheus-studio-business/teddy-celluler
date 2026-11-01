@@ -317,10 +317,10 @@ export default function KasBankPage() {
             <div>
               <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
                 <Landmark className="h-6 w-6 text-blue-600" />
-                Saldo Kas & Bank / E-Wallet
+                Kas & Bank
               </h1>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Pemantauan dan pencatatan saldo riil seluruh rekening toko.
+                Catatan dan monitoring saldo rekening toko.
               </p>
             </div>
           </div>
@@ -366,60 +366,44 @@ export default function KasBankPage() {
           </div>
         )}
 
-        {/* Global Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Grand Total */}
-          <div className="bg-gradient-to-br from-slate-900 to-slate-800 dark:from-black dark:to-neutral-900 text-white rounded-2xl p-6 shadow-xl border border-slate-800 flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs uppercase font-bold text-slate-400 tracking-wider">
-                Total Saldo Keseluruhan
-              </span>
-              <div className="p-1.5 rounded-full bg-white/10 text-white">
-                <Landmark className="h-4 w-4 text-blue-400" />
+        {/* Global Summary Card (Hanya Total Saldo Keseluruhan) */}
+        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-black dark:via-neutral-900 dark:to-black text-white rounded-2xl p-6 sm:p-7 shadow-xl border border-slate-800/80">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-1.5 rounded-lg bg-blue-500/20 text-blue-400">
+                  <Landmark className="h-4 w-4" />
+                </div>
+                <span className="text-xs uppercase font-bold text-slate-400 tracking-wider">
+                  Total Saldo Keseluruhan
+                </span>
               </div>
+              <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+                {formatRupiah(totalGrandBalance)}
+              </div>
+              <p className="text-xs text-slate-400 mt-2">
+                Total aset kas likuid di {accounts.length} rekening bank & dompet digital
+              </p>
             </div>
-            <div className="text-3xl font-extrabold tracking-tight text-white mb-2">
-              {formatRupiah(totalGrandBalance)}
-            </div>
-            <p className="text-xs text-slate-400">
-              Total aset kas likuid di {accounts.length} akun aktif
-            </p>
-          </div>
 
-          {/* Total Bank */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs uppercase font-bold text-slate-500 tracking-wider">
-                Total Saldo Bank
-              </span>
-              <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-600">
-                <Landmark className="h-4 w-4" />
+            <div className="flex items-center gap-2.5">
+              <div className="px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 text-left">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                  Rekening Bank
+                </span>
+                <span className="text-xs sm:text-sm font-bold text-blue-300">
+                  {accounts.filter((a) => a.type === "bank").length} Akun
+                </span>
+              </div>
+              <div className="px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 text-left">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                  E-Wallet
+                </span>
+                <span className="text-xs sm:text-sm font-bold text-emerald-300">
+                  {accounts.filter((a) => a.type === "ewallet").length} Akun
+                </span>
               </div>
             </div>
-            <div className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-              {formatRupiah(totalBankBalance)}
-            </div>
-            <p className="text-xs text-slate-500">
-              {accounts.filter((a) => a.type === "bank").length} Rekening Bank
-            </p>
-          </div>
-
-          {/* Total E-Wallet */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs uppercase font-bold text-slate-500 tracking-wider">
-                Total Saldo E-Wallet
-              </span>
-              <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600">
-                <Smartphone className="h-4 w-4" />
-              </div>
-            </div>
-            <div className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-              {formatRupiah(totalEwalletBalance)}
-            </div>
-            <p className="text-xs text-slate-500">
-              {accounts.filter((a) => a.type === "ewallet").length} Dompet Digital
-            </p>
           </div>
         </div>
 
@@ -431,42 +415,45 @@ export default function KasBankPage() {
                 setActiveTab("accounts");
                 setSelectedAccount(null);
               }}
-              className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-colors ${
+              className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-colors flex items-center gap-1.5 ${
                 activeTab === "accounts"
                   ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
                   : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
               }`}
+              title="Daftar Rekening & Akun"
             >
-              Daftar Rekening & Akun
+              <Landmark className="h-4 w-4" />
+              <span className="hidden sm:inline">Daftar Akun</span>
             </button>
             <button
               onClick={() => {
                 setActiveTab("history");
                 setEditingLog(null);
               }}
-              className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-colors flex items-center gap-1.5 ${
+              className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-colors flex items-center gap-1.5 ${
                 activeTab === "history"
                   ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
                   : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
               }`}
+              title="Riwayat Catatan Saldo"
             >
               <History className="h-4 w-4" />
-              Riwayat Input Saldo
+              <span className="hidden sm:inline">Riwayat Catatan</span>
             </button>
           </div>
 
           {isAdmin && (
             <button
               onClick={() => setActiveTab("new-account")}
-              className={`px-3 py-2 text-xs font-semibold rounded-xl transition-colors flex items-center gap-1.5 ${
+              className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-colors flex items-center gap-1.5 ${
                 activeTab === "new-account"
                   ? "bg-blue-600 text-white"
                   : "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 hover:bg-blue-100"
               }`}
+              title="Tambah Akun Baru"
             >
               <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Tambah Akun Baru</span>
-              <span className="sm:hidden">Tambah</span>
+              <span className="hidden sm:inline">Tambah Akun</span>
             </button>
           )}
         </div>
@@ -508,12 +495,12 @@ export default function KasBankPage() {
               </button>
             </div>
 
-            {/* Form Input Saldo Baru (Saat Tombol "Update Saldo" Diklik) */}
-            {selectedAccount && (
-              <div className="bg-slate-50 dark:bg-slate-900 p-5 rounded-2xl border-2 border-emerald-500/70 shadow-xl animate-in fade-in space-y-4 max-w-lg">
+            {/* Form Koreksi Saldo Akun (Khusus Admin) */}
+            {selectedAccount && isAdmin && (
+              <div className="bg-amber-50/70 dark:bg-amber-950/30 p-5 rounded-2xl border-2 border-amber-500/70 shadow-xl animate-in fade-in space-y-4 max-w-lg">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className="p-2 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
+                    <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-400">
                       {selectedAccount.type === "bank" ? (
                         <Landmark className="h-5 w-5" />
                       ) : (
@@ -521,8 +508,11 @@ export default function KasBankPage() {
                       )}
                     </div>
                     <div>
-                      <h4 className="text-base font-bold text-slate-900 dark:text-white">
-                        Input Saldo: {selectedAccount.name}
+                      <h4 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span>Koreksi Saldo: {selectedAccount.name}</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-200 dark:bg-amber-900/80 text-amber-800 dark:text-amber-300 font-bold uppercase">
+                          Khusus Admin
+                        </span>
                       </h4>
                       <p className="text-xs text-slate-500">
                         Saldo saat ini: {formatRupiah(selectedAccount.currentBalance)}
@@ -540,43 +530,34 @@ export default function KasBankPage() {
                 <div className="space-y-3">
                   <div>
                     <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                      Jumlah Saldo Terakhir (Rp)
+                      Jumlah Saldo yang Benar (Rp)
                     </label>
                     <NumberInput
                       value={inputAmount}
                       onValueChange={setInputAmount}
-                      placeholder="Masukkan saldo yang ada..."
+                      placeholder="Masukkan saldo yang benar..."
                       autoFocus
                     />
                   </div>
 
                   <div>
                     <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                      Catatan (Opsional)
+                      Alasan / Catatan Koreksi
                     </label>
                     <Input
                       value={inputNotes}
                       onChange={(e) => setInputNotes(e.target.value)}
-                      placeholder="Contoh: Shift Pagi, Rekap Tutup Toko, dsb."
+                      placeholder="Contoh: Koreksi salah input oleh kasir"
                     />
                   </div>
-
-                  {!isAdmin && (
-                    <div className="flex items-center gap-2 text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 p-2.5 rounded-xl border border-amber-200 dark:border-amber-800/60">
-                      <ShieldAlert className="h-4 w-4 shrink-0" />
-                      <span>
-                        Harap periksa kembali sebelum menyimpan. Pegawai tidak dapat mengubah atau menghapus data setelah dikirim.
-                      </span>
-                    </div>
-                  )}
 
                   <div className="flex items-center gap-2 pt-1">
                     <Button
                       onClick={handleSaveBalance}
                       disabled={isPending || !inputAmount}
-                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                      className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold"
                     >
-                      {isPending ? "Menyimpan..." : "Simpan Saldo"}
+                      {isPending ? "Menyimpan Koreksi..." : "Simpan Koreksi Admin"}
                     </Button>
                     <Button
                       variant="outline"
@@ -664,20 +645,22 @@ export default function KasBankPage() {
                       </div>
                     </div>
 
-                    <div className="mt-5 pt-3 border-t border-slate-100 dark:border-slate-800">
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          setSelectedAccount(account);
-                          setInputAmount(account.currentBalance ? String(account.currentBalance) : "");
-                          setInputNotes("");
-                        }}
-                        className="w-full text-xs font-semibold bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-                      >
-                        <Pencil className="h-3.5 w-3.5 mr-1.5 text-slate-400" />
-                        Input Saldo Baru
-                      </Button>
-                    </div>
+                    {isAdmin && (
+                      <div className="mt-5 pt-3 border-t border-slate-100 dark:border-slate-800">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedAccount(account);
+                            setInputAmount(account.currentBalance ? String(account.currentBalance) : "");
+                            setInputNotes("");
+                          }}
+                          className="w-full text-xs font-semibold bg-slate-50 hover:bg-amber-50 dark:bg-slate-800 dark:hover:bg-amber-950/30 text-slate-700 dark:text-slate-300 hover:text-amber-700 dark:hover:text-amber-400 border-dashed"
+                        >
+                          <Pencil className="h-3.5 w-3.5 mr-1.5 text-amber-500" />
+                          Koreksi Saldo (Admin)
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -948,6 +931,7 @@ export default function KasBankPage() {
         onAddTransaction={() => {
           router.push("/");
         }}
+        onBalanceSaved={loadData}
       />
 
       {/* Modal Dialog Konfirmasi Hapus Akun Bank / E-Wallet */}

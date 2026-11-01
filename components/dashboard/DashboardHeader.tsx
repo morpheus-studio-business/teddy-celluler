@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { SummaryStats } from "@/components/dashboard/SummaryStats";
-import { QuickButtons } from "@/components/dashboard/QuickButtons";
 import { TransactionCategory } from "@/types";
 
 interface DashboardHeaderProps {
@@ -9,7 +8,7 @@ interface DashboardHeaderProps {
   currentPeriodBalance: number;
   income: number;
   expense: number;
-  onAddClick: (category: TransactionCategory) => void;
+  onAddClick?: (category: TransactionCategory) => void;
 }
 
 export function DashboardHeader({
@@ -18,10 +17,9 @@ export function DashboardHeader({
   currentPeriodBalance,
   income,
   expense,
-  onAddClick,
 }: DashboardHeaderProps) {
   return (
-    <div className="bg-white dark:bg-brand-dark/50 pt-8 pb-12 px-4 md:px-8 backdrop-blur-sm border-b border-slate-200/50 dark:border-white/5">
+    <div className="bg-white dark:bg-brand-dark/50 pt-8 pb-8 px-4 md:px-8 backdrop-blur-sm border-b border-slate-200/50 dark:border-white/5">
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div className="flex flex-col gap-1">
@@ -50,7 +48,6 @@ export function DashboardHeader({
           income={income}
           expense={expense}
         />
-        <QuickButtons onAddClick={onAddClick} />
       </div>
     </div>
   );

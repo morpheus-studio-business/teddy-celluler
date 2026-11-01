@@ -18,12 +18,20 @@ import {
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { TransactionCategory } from "@/types";
+import { RecordBalanceModal } from "@/components/dashboard/RecordBalanceModal";
+import { LoginRequiredModal } from "@/components/dashboard/LoginRequiredModal";
 
 interface DockBarProps {
   onAddTransaction?: (category: TransactionCategory) => void;
+  onAddBalance?: () => void;
+  onBalanceSaved?: () => void;
 }
 
-export function DockBar({ onAddTransaction }: DockBarProps) {
+export function DockBar({
+  onAddTransaction,
+  onAddBalance,
+  onBalanceSaved,
+}: DockBarProps) {
   const pathname = usePathname();
   const isHome = pathname === "/";
   const isKasBank = pathname === "/kas-bank";
@@ -33,6 +41,8 @@ export function DockBar({ onAddTransaction }: DockBarProps) {
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
+  const [isRecordBalanceOpen, setIsRecordBalanceOpen] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const userMenuRef = useRef<HTMLDivElement>(null);
   const addMenuRef = useRef<HTMLDivElement>(null);
@@ -111,6 +121,30 @@ export function DockBar({ onAddTransaction }: DockBarProps) {
             <div>
               <p className="text-xs font-bold leading-tight">Pengeluaran</p>
               <p className="text-[10px] text-slate-400">Tarik tunai, operasional</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => {
+              setIsAddMenuOpen(false);
+              if (!session) {
+                setShowLoginModal(true);
+                return;
+              }
+              if (onAddBalance) {
+                onAddBalance();
+              } else {
+                setIsRecordBalanceOpen(true);
+              }
+            }}
+            className="flex items-center gap-2.5 p-2 rounded-xl text-left hover:bg-blue-50 dark:hover:bg-blue-950/40 text-blue-700 dark:text-blue-400 transition-colors w-full group"
+          >
+            <div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/50 group-hover:scale-105 transition-transform">
+              <Landmark className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-xs font-bold leading-tight">Sisa Saldo</p>
+              <p className="text-[10px] text-slate-400">Catat saldo bank / e-wallet</p>
             </div>
           </button>
         </div>
@@ -304,6 +338,24 @@ export function DockBar({ onAddTransaction }: DockBarProps) {
           </span>
         </button>
       </nav>
+
+      {/* MODAL INPUT SISA SALDO */}
+      <RecordBalanceModal
+        isOpen={isRecordBalanceOpen}
+        onClose={() => setIsRecordBalanceOpen(false)}
+        onSuccess={() => {
+          if (onBalanceSaved) {
+            onBalanceSaved();
+          }
+        }}
+        onLoginRequired={() => setShowLoginModal(true)}
+      />
+
+      {/* MODAL PERINGATAN LOGIN */}
+      <LoginRequiredModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+      />
     </div>
   );
 }

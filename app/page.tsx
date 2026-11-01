@@ -250,14 +250,6 @@ export default function Home() {
         currentPeriodBalance={currentPeriodBalance}
         income={totalIncome}
         expense={totalExpense}
-        onAddClick={(category) => {
-          if (!session) {
-            setShowLoginModal(true);
-            return;
-          }
-          const mode = category === "withdraw" ? "expense" : "income";
-          openAddModal(mode);
-        }}
       />
 
       <LoginRequiredModal

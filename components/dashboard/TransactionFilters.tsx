@@ -34,114 +34,126 @@ export function TransactionFilters({
   onSharePdf,
 }: TransactionFiltersProps) {
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full">
-      <div className="flex items-center gap-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              className="gap-2 bg-white dark:bg-slate-950"
-            >
-              <CalendarIcon className="h-4 w-4" />
-              <span className="hidden sm:inline">
-                {dateFilter === "daily"
-                  ? "Hari Ini"
-                  : dateFilter === "weekly"
-                    ? "Minggu Ini"
-                    : dateFilter === "monthly"
-                      ? "Bulan Ini"
-                      : dateFilter === "custom"
-                        ? "Custom Tanggal"
-                        : "Semua Tanggal"}
-              </span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
-            <DropdownMenuLabel>Rentang Waktu</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => setDateFilter("daily")}>
-              Hari Ini
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setDateFilter("weekly")}>
-              Minggu Ini
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setDateFilter("monthly")}>
-              Bulan Ini
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setDateFilter("custom")}>
-              Custom Tanggal
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setDateFilter("all")}>
-              Semua Tanggal
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+    <div className="flex flex-col gap-2 w-full">
+      <div className="flex items-center justify-between gap-2 w-full">
+        <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="gap-2 bg-white dark:bg-slate-950"
+              >
+                <CalendarIcon className="h-4 w-4" />
+                <span className="hidden sm:inline">
+                  {dateFilter === "daily"
+                    ? "Hari Ini"
+                    : dateFilter === "weekly"
+                      ? "Minggu Ini"
+                      : dateFilter === "monthly"
+                        ? "Bulan Ini"
+                        : dateFilter === "custom"
+                          ? "Custom Tanggal"
+                          : "Semua Tanggal"}
+                </span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuLabel>Rentang Waktu</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => setDateFilter("daily")}>
+                Hari Ini
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setDateFilter("weekly")}>
+                Minggu Ini
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setDateFilter("monthly")}>
+                Bulan Ini
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setDateFilter("custom")}>
+                Custom Tanggal
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setDateFilter("all")}>
+                Semua Tanggal
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              className="gap-2 bg-white dark:bg-slate-950"
-            >
-              <LayoutGrid className="h-4 w-4" />
-              <span className="hidden sm:inline">
-                {categoryFilter === "transfer"
-                  ? "Transfer"
-                  : categoryFilter === "withdraw"
-                    ? "Tarik Tunai"
-                    : categoryFilter === "voucher"
-                      ? "Voucher"
-                      : categoryFilter === "data_package"
-                        ? "Paket Data"
-                        : categoryFilter === "pulsa"
-                          ? "Pulsa"
-                          : categoryFilter === "e-wallet"
-                            ? "E-Wallet"
-                            : categoryFilter === "other"
-                              ? "Aksesoris"
-                              : categoryFilter === "general"
-                                ? "Lainnya"
-                                : "Semua Tipe"}
-              </span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
-            <DropdownMenuLabel>Tipe Transaksi</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => setCategoryFilter("all")}>
-              Semua Tipe
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setCategoryFilter("transfer")}>
-              Transfer
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setCategoryFilter("withdraw")}>
-              Tarik Tunai
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setCategoryFilter("voucher")}>
-              Voucher
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setCategoryFilter("data_package")}>
-              Paket Data
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setCategoryFilter("pulsa")}>
-              Pulsa
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setCategoryFilter("e-wallet")}>
-              E-Wallet
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setCategoryFilter("other")}>
-              Aksesoris
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setCategoryFilter("general")}>
-              Lainnya
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="gap-2 bg-white dark:bg-slate-950"
+              >
+                <LayoutGrid className="h-4 w-4" />
+                <span className="hidden sm:inline">
+                  {categoryFilter === "transfer"
+                    ? "Transfer"
+                    : categoryFilter === "withdraw"
+                      ? "Tarik Tunai"
+                      : categoryFilter === "voucher"
+                        ? "Voucher"
+                        : categoryFilter === "data_package"
+                          ? "Paket Data"
+                          : categoryFilter === "pulsa"
+                            ? "Pulsa"
+                            : categoryFilter === "e-wallet"
+                              ? "E-Wallet"
+                              : categoryFilter === "other"
+                                ? "Aksesoris"
+                                : categoryFilter === "general"
+                                  ? "Lainnya"
+                                  : "Semua Tipe"}
+                </span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuLabel>Tipe Transaksi</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => setCategoryFilter("all")}>
+                Semua Tipe
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setCategoryFilter("transfer")}>
+                Transfer
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCategoryFilter("withdraw")}>
+                Tarik Tunai
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCategoryFilter("voucher")}>
+                Voucher
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCategoryFilter("data_package")}>
+                Paket Data
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCategoryFilter("pulsa")}>
+                Pulsa
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCategoryFilter("e-wallet")}>
+                E-Wallet
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCategoryFilter("other")}>
+                Aksesoris
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCategoryFilter("general")}>
+                Lainnya
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Share PDF Button (Sejajar di baris yang sama dengan filter) */}
+        <Button
+          variant="outline"
+          onClick={onSharePdf}
+          className="gap-2 shrink-0 bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 border-none"
+        >
+          <Share2 className="h-4 w-4" />
+          <span className="hidden sm:inline">Share PDF</span>
+        </Button>
       </div>
 
       {/* Custom Date Inputs */}
       {dateFilter === "custom" && (
-        <div className="flex items-center gap-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md px-3 py-1.5 shadow-sm">
+        <div className="flex items-center gap-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-md px-3 py-1.5 shadow-sm w-fit animate-in fade-in">
           <input
             type="date"
             value={startDate}
@@ -157,16 +169,6 @@ export function TransactionFilters({
           />
         </div>
       )}
-
-      {/* Share PDF Button */}
-      <Button
-        variant="outline"
-        onClick={onSharePdf}
-        className="gap-2 ml-auto bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 border-none"
-      >
-        <Share2 className="h-4 w-4" />
-        <span className="hidden sm:inline">Share PDF</span>
-      </Button>
     </div>
   );
 }
