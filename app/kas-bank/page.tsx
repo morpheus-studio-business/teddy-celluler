@@ -18,6 +18,7 @@ import {
   ArrowLeft,
   RotateCcw,
   Loader2,
+  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NumberInput } from "@/components/ui/number-input";
@@ -36,6 +37,7 @@ import { authClient } from "@/lib/auth-client";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { DockBar } from "@/components/dashboard/DockBar";
+import { RecordBalanceModal } from "@/components/dashboard/RecordBalanceModal";
 import { LoginRequiredModal } from "@/components/dashboard/LoginRequiredModal";
 import { useRouter } from "next/navigation";
 import {
@@ -56,6 +58,7 @@ export default function KasBankPage() {
   const [isPending, startTransition] = useTransition();
 
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isRecordBalanceOpen, setIsRecordBalanceOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"accounts" | "history" | "new-account">("accounts");
   const [filterType, setFilterType] = useState<"all" | "bank" | "ewallet">("all");
   const [accounts, setAccounts] = useState<FinancialAccount[]>([]);
@@ -304,22 +307,22 @@ export default function KasBankPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-brand-dark pb-32 font-sans selection:bg-blue-100 selection:text-blue-900">
       {/* Top Header */}
-      <div className="bg-white dark:bg-brand-dark/50 pt-6 pb-6 px-4 md:px-8 border-b border-slate-200/50 dark:border-white/5 backdrop-blur-sm sticky top-0 z-30">
+      <div className="bg-white dark:bg-brand-dark/50 py-3 sm:py-5 px-3.5 sm:px-6 md:px-8 border-b border-slate-200/50 dark:border-white/5 backdrop-blur-sm sticky top-0 z-30">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/"
-              className="p-2 -ml-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="p-1.5 sm:p-2 -ml-1 sm:-ml-2 rounded-lg sm:rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               title="Kembali ke Beranda"
             >
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             </Link>
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-                <Landmark className="h-6 w-6 text-blue-600" />
-                Kas & Bank
+              <h1 className="text-base sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5 sm:gap-2">
+                <Landmark className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 shrink-0" />
+                <span>Kas & Bank</span>
               </h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px] sm:max-w-none">
                 Catatan dan monitoring saldo rekening toko.
               </p>
             </div>
@@ -330,26 +333,26 @@ export default function KasBankPage() {
             size="sm"
             onClick={loadData}
             disabled={isLoading}
-            className="gap-1.5 text-xs bg-white dark:bg-slate-900"
+            className="gap-1.5 text-xs h-8 sm:h-9 px-2.5 sm:px-3 bg-white dark:bg-slate-900"
           >
-            <RotateCcw className={`h-3.5 w-3.5 ${isLoading ? "animate-spin" : ""}`} />
+            <RotateCcw className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${isLoading ? "animate-spin" : ""}`} />
             <span className="hidden sm:inline">Refresh</span>
           </Button>
         </div>
       </div>
 
       {/* Main Content Area */}
-      <div className="max-w-5xl mx-auto px-4 md:px-8 mt-6 space-y-6">
+      <div className="max-w-5xl mx-auto px-3.5 sm:px-6 md:px-8 mt-3.5 sm:mt-6 space-y-3.5 sm:space-y-6">
         {/* Status Alert */}
         {statusMessage && (
           <div
-            className={`p-4 rounded-xl text-xs sm:text-sm flex items-center justify-between gap-3 animate-in fade-in ${
+            className={`p-3 sm:p-4 rounded-xl text-xs sm:text-sm flex items-center justify-between gap-3 animate-in fade-in ${
               statusMessage.type === "success"
                 ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
                 : "bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
             }`}
           >
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2">
               {statusMessage.type === "success" ? (
                 <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
               ) : (
@@ -367,36 +370,36 @@ export default function KasBankPage() {
         )}
 
         {/* Global Summary Card (Hanya Total Saldo Keseluruhan) */}
-        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-black dark:via-neutral-900 dark:to-black text-white rounded-2xl p-6 sm:p-7 shadow-xl border border-slate-800/80">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-black dark:via-neutral-900 dark:to-black text-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-7 shadow-lg sm:shadow-xl border border-slate-800/80">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="p-1.5 rounded-lg bg-blue-500/20 text-blue-400">
-                  <Landmark className="h-4 w-4" />
+              <div className="flex items-center gap-1.5 mb-1 sm:mb-2">
+                <div className="p-1 sm:p-1.5 rounded-md sm:rounded-lg bg-blue-500/20 text-blue-400">
+                  <Landmark className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </div>
-                <span className="text-xs uppercase font-bold text-slate-400 tracking-wider">
+                <span className="text-[10px] sm:text-xs uppercase font-bold text-slate-400 tracking-wider">
                   Total Saldo Keseluruhan
                 </span>
               </div>
-              <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+              <div className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white">
                 {formatRupiah(totalGrandBalance)}
               </div>
-              <p className="text-xs text-slate-400 mt-2">
+              <p className="text-[11px] sm:text-xs text-slate-400 mt-1 sm:mt-2">
                 Total aset kas likuid di {accounts.length} rekening bank & dompet digital
               </p>
             </div>
 
-            <div className="flex items-center gap-2.5">
-              <div className="px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 text-left">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-2.5 mt-2 sm:mt-0">
+              <div className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-white/5 border border-white/10 text-left">
+                <span className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 block leading-tight">
                   Rekening Bank
                 </span>
                 <span className="text-xs sm:text-sm font-bold text-blue-300">
                   {accounts.filter((a) => a.type === "bank").length} Akun
                 </span>
               </div>
-              <div className="px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 text-left">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block">
+              <div className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-white/5 border border-white/10 text-left">
+                <span className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 block leading-tight">
                   E-Wallet
                 </span>
                 <span className="text-xs sm:text-sm font-bold text-emerald-300">
@@ -407,65 +410,90 @@ export default function KasBankPage() {
           </div>
         </div>
 
+        {/* Tombol Catat Sisa Saldo (Di antara Saldo Keseluruhan dan Catatannya) */}
+        <button
+          type="button"
+          onClick={() => {
+            if (!session) {
+              setShowLoginModal(true);
+              return;
+            }
+            setIsRecordBalanceOpen(true);
+          }}
+          className="w-full flex items-center justify-center gap-2.5 sm:gap-3 py-3 sm:py-3.5 px-3.5 sm:px-4 rounded-xl sm:rounded-2xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white shadow-md sm:shadow-lg shadow-blue-600/25 hover:shadow-blue-600/35 transition-all duration-200 group cursor-pointer"
+        >
+          <div className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-white/20 group-hover:scale-110 transition-transform shrink-0">
+            <Wallet className="h-4 w-4 sm:h-5 sm:w-5 stroke-[2.5]" />
+          </div>
+          <div className="text-left">
+            <span className="block text-xs sm:text-sm font-extrabold leading-tight tracking-wide">
+              Catat Sisa Saldo
+            </span>
+            <span className="text-[10px] sm:text-xs text-blue-100/90 font-medium hidden sm:block">
+              Perbarui saldo riil bank atau dompet digital toko
+            </span>
+          </div>
+        </button>
+
         {/* Tab Controls */}
-        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2 sm:pb-3">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <button
               onClick={() => {
                 setActiveTab("accounts");
                 setSelectedAccount(null);
               }}
-              className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-colors flex items-center gap-1.5 ${
+              className={`px-2.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm font-semibold rounded-lg sm:rounded-xl transition-colors flex items-center gap-1.5 ${
                 activeTab === "accounts"
                   ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
                   : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
               }`}
               title="Daftar Rekening & Akun"
             >
-              <Landmark className="h-4 w-4" />
-              <span className="hidden sm:inline">Daftar Akun</span>
+              <Landmark className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+              <span>Daftar Akun</span>
             </button>
             <button
               onClick={() => {
                 setActiveTab("history");
                 setEditingLog(null);
               }}
-              className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-colors flex items-center gap-1.5 ${
+              className={`px-2.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm font-semibold rounded-lg sm:rounded-xl transition-colors flex items-center gap-1.5 ${
                 activeTab === "history"
                   ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
                   : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
               }`}
               title="Riwayat Catatan Saldo"
             >
-              <History className="h-4 w-4" />
-              <span className="hidden sm:inline">Riwayat Catatan</span>
+              <History className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+              <span>Riwayat</span>
             </button>
           </div>
 
           {isAdmin && (
             <button
               onClick={() => setActiveTab("new-account")}
-              className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold rounded-xl transition-colors flex items-center gap-1.5 ${
+              className={`px-2.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm font-semibold rounded-lg sm:rounded-xl transition-colors flex items-center gap-1.5 ${
                 activeTab === "new-account"
                   ? "bg-blue-600 text-white"
                   : "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 hover:bg-blue-100"
               }`}
               title="Tambah Akun Baru"
             >
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Tambah Akun</span>
+              <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+              <span>Tambah Akun</span>
             </button>
           )}
         </div>
 
         {/* TAB 1: DAFTAR AKUN SALDO */}
         {activeTab === "accounts" && (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {/* Filter Pills */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1">
               <button
                 onClick={() => setFilterType("all")}
-                className={`px-3 py-1.5 text-xs rounded-full font-medium transition-colors ${
+                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs rounded-full font-medium transition-colors shrink-0 ${
                   filterType === "all"
                     ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
                     : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-200"
@@ -475,7 +503,7 @@ export default function KasBankPage() {
               </button>
               <button
                 onClick={() => setFilterType("bank")}
-                className={`px-3 py-1.5 text-xs rounded-full font-medium transition-colors ${
+                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs rounded-full font-medium transition-colors shrink-0 ${
                   filterType === "bank"
                     ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
                     : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-200"
@@ -485,7 +513,7 @@ export default function KasBankPage() {
               </button>
               <button
                 onClick={() => setFilterType("ewallet")}
-                className={`px-3 py-1.5 text-xs rounded-full font-medium transition-colors ${
+                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 text-[11px] sm:text-xs rounded-full font-medium transition-colors shrink-0 ${
                   filterType === "ewallet"
                     ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
                     : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-200"
@@ -578,34 +606,34 @@ export default function KasBankPage() {
                 <p className="text-xs">Memuat data rekening dan saldo...</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {filteredAccounts.map((account) => (
                   <div
                     key={account.id}
-                    className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
+                    className="bg-white dark:bg-slate-900 p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all flex flex-col justify-between"
                   >
                     <div>
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-3">
+                      <div className="flex items-start justify-between gap-2.5 sm:gap-3">
+                        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                           <div
-                            className={`p-3 rounded-xl shrink-0 ${
+                            className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl shrink-0 ${
                               account.type === "bank"
                                 ? "bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400"
                                 : "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400"
                             }`}
                           >
                             {account.type === "bank" ? (
-                              <Landmark className="h-5 w-5" />
+                              <Landmark className="h-4 w-4 sm:h-5 sm:w-5" />
                             ) : (
-                              <Smartphone className="h-5 w-5" />
+                              <Smartphone className="h-4 w-4 sm:h-5 sm:w-5" />
                             )}
                           </div>
-                          <div>
-                            <h4 className="text-base font-bold text-slate-900 dark:text-white leading-tight">
+                          <div className="min-w-0">
+                            <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white leading-tight truncate">
                               {account.name}
                             </h4>
                             {account.accountNumber && (
-                              <p className="text-xs text-slate-500 font-mono mt-0.5">
+                              <p className="text-[11px] sm:text-xs text-slate-500 font-mono mt-0.5 truncate">
                                 {account.accountNumber}
                               </p>
                             )}
@@ -615,25 +643,25 @@ export default function KasBankPage() {
                         {isAdmin && (
                           <button
                             onClick={() => setAccountToDelete(account)}
-                            className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors"
+                            className="p-1 sm:p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-md sm:rounded-lg transition-colors shrink-0"
                             title="Hapus Akun"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                           </button>
                         )}
                       </div>
 
-                      <div className="mt-5">
-                        <p className="text-xs text-slate-400 uppercase font-semibold">
+                      <div className="mt-3.5 sm:mt-5">
+                        <p className="text-[10px] sm:text-xs text-slate-400 uppercase font-semibold tracking-wider">
                           Saldo Tersedia
                         </p>
-                        <p className="text-2xl font-extrabold text-slate-900 dark:text-white">
+                        <p className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                           {formatRupiah(account.currentBalance)}
                         </p>
                       </div>
 
-                      <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-400">
-                        <Clock className="h-3.5 w-3.5 shrink-0" />
+                      <div className="mt-2 sm:mt-3 flex items-center gap-1.5 text-[10px] sm:text-xs text-slate-400">
+                        <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
                         <span className="truncate">
                           {account.lastUpdatedAt
                             ? format(new Date(account.lastUpdatedAt), "dd MMM yyyy, HH:mm", {
@@ -645,22 +673,39 @@ export default function KasBankPage() {
                       </div>
                     </div>
 
-                    {isAdmin && (
-                      <div className="mt-5 pt-3 border-t border-slate-100 dark:border-slate-800">
+                    <div className="mt-3.5 sm:mt-5 pt-2.5 sm:pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          if (!session) {
+                            setShowLoginModal(true);
+                            return;
+                          }
+                          setIsRecordBalanceOpen(true);
+                        }}
+                        className="w-full text-xs font-semibold h-8 sm:h-9 bg-blue-50/70 hover:bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-900 transition-colors"
+                      >
+                        <Wallet className="h-3.5 w-3.5 mr-1.5 text-blue-600 dark:text-blue-400 shrink-0" />
+                        Catat Saldo
+                      </Button>
+
+                      {isAdmin && (
                         <Button
                           variant="outline"
+                          size="sm"
                           onClick={() => {
                             setSelectedAccount(account);
                             setInputAmount(account.currentBalance ? String(account.currentBalance) : "");
                             setInputNotes("");
                           }}
-                          className="w-full text-xs font-semibold bg-slate-50 hover:bg-amber-50 dark:bg-slate-800 dark:hover:bg-amber-950/30 text-slate-700 dark:text-slate-300 hover:text-amber-700 dark:hover:text-amber-400 border-dashed"
+                          className="h-8 sm:h-9 px-2.5 text-xs font-semibold bg-slate-50 hover:bg-amber-50 dark:bg-slate-800 text-slate-700 hover:text-amber-700 border-dashed shrink-0"
+                          title="Koreksi Saldo (Admin)"
                         >
-                          <Pencil className="h-3.5 w-3.5 mr-1.5 text-amber-500" />
-                          Koreksi Saldo (Admin)
+                          <Pencil className="h-3.5 w-3.5 text-amber-500" />
                         </Button>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -737,16 +782,16 @@ export default function KasBankPage() {
               </div>
             )}
 
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
-              <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800">
-                <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-2 text-sm">
-                  <History className="h-4 w-4 text-slate-400" />
+            <div className="bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+              <div className="px-4 py-3 sm:px-6 sm:py-4 border-b border-slate-200 dark:border-slate-800">
+                <h3 className="font-semibold text-slate-900 dark:text-white flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                  <History className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-400" />
                   Riwayat Audit Input Saldo
                 </h3>
               </div>
 
               {logs.length === 0 ? (
-                <div className="py-12 text-center text-slate-400 text-sm">
+                <div className="py-10 sm:py-12 text-center text-slate-400 text-xs sm:text-sm">
                   Belum ada catatan riwayat input saldo.
                 </div>
               ) : (
@@ -754,36 +799,36 @@ export default function KasBankPage() {
                   {logs.map((log) => (
                     <div
                       key={log.id}
-                      className="px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
+                      className="px-3.5 py-3 sm:px-6 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
                     >
                       <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-slate-900 dark:text-white text-sm">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm">
                             {log.accountName || "Akun"}
                           </span>
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-semibold">
+                          <span className="text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-semibold">
                             {log.accountType === "bank" ? "Bank" : "E-Wallet"}
                           </span>
                         </div>
 
-                        <div className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
+                        <div className="text-base sm:text-lg font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5 sm:mt-1">
                           {formatRupiah(log.amount)}
                         </div>
 
                         {log.notes && (
-                          <p className="text-xs text-slate-500 italic mt-0.5">
+                          <p className="text-[11px] sm:text-xs text-slate-500 italic mt-0.5">
                             &quot;{log.notes}&quot;
                           </p>
                         )}
 
-                        <div className="flex items-center gap-3 text-xs text-slate-400 mt-1.5">
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-3 text-[10px] sm:text-xs text-slate-400 mt-1">
                           <span className="flex items-center gap-1">
-                            <UserIcon className="h-3.5 w-3.5" />
+                            <UserIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                             Diinput oleh: <strong className="text-slate-700 dark:text-slate-300">{log.userName}</strong>
                           </span>
                           <span>•</span>
                           <span>
-                            {format(new Date(log.createdAt), "dd MMMM yyyy, HH:mm", {
+                            {format(new Date(log.createdAt), "dd MMM yyyy, HH:mm", {
                               locale: idLocale,
                             })}
                           </span>
@@ -791,7 +836,7 @@ export default function KasBankPage() {
                       </div>
 
                       {isAdmin ? (
-                        <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 pt-1 sm:pt-0">
                           <Button
                             size="sm"
                             variant="outline"
@@ -800,23 +845,23 @@ export default function KasBankPage() {
                               setEditAmount(String(log.amount));
                               setEditNotes(log.notes || "");
                             }}
-                            className="text-xs gap-1.5 hover:text-amber-600"
+                            className="h-7 sm:h-8 px-2 sm:px-3 text-[11px] sm:text-xs gap-1 hover:text-amber-600"
                           >
-                            <Pencil className="h-3.5 w-3.5" />
+                            <Pencil className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                             Koreksi
                           </Button>
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => setLogToDelete(log)}
-                            className="text-xs gap-1.5 hover:text-rose-600 text-rose-500"
+                            className="h-7 sm:h-8 px-2 sm:px-3 text-[11px] sm:text-xs gap-1 hover:text-rose-600 text-rose-500"
                           >
-                            <Trash2 className="h-3.5 w-3.5" />
+                            <Trash2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                             Hapus
                           </Button>
                         </div>
                       ) : (
-                        <span className="text-xs text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full shrink-0">
+                        <span className="text-[10px] sm:text-xs text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full shrink-0 self-start sm:self-auto">
                           Terkunci
                         </span>
                       )}
@@ -926,13 +971,16 @@ export default function KasBankPage() {
         onClose={() => setShowLoginModal(false)}
       />
 
-      {/* Dockbar tetap aktif di bawah */}
-      <DockBar
-        onAddTransaction={() => {
-          router.push("/");
-        }}
-        onBalanceSaved={loadData}
+      {/* Modal Input Sisa Saldo */}
+      <RecordBalanceModal
+        isOpen={isRecordBalanceOpen}
+        onClose={() => setIsRecordBalanceOpen(false)}
+        onSuccess={loadData}
+        onLoginRequired={() => setShowLoginModal(true)}
       />
+
+      {/* Dockbar tetap aktif di bawah */}
+      <DockBar />
 
       {/* Modal Dialog Konfirmasi Hapus Akun Bank / E-Wallet */}
       <AlertDialog

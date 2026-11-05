@@ -6,20 +6,14 @@ import { usePathname } from "next/navigation";
 import {
   Home,
   Landmark,
-  Plus,
   ShieldCheck,
   User as UserIcon,
   LogOut,
   LogIn,
   UserPlus,
-  ArrowUpIcon,
-  ArrowDownIcon,
-  X,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { TransactionCategory } from "@/types";
-import { RecordBalanceModal } from "@/components/dashboard/RecordBalanceModal";
-import { LoginRequiredModal } from "@/components/dashboard/LoginRequiredModal";
 
 interface DockBarProps {
   onAddTransaction?: (category: TransactionCategory) => void;
@@ -27,11 +21,7 @@ interface DockBarProps {
   onBalanceSaved?: () => void;
 }
 
-export function DockBar({
-  onAddTransaction,
-  onAddBalance,
-  onBalanceSaved,
-}: DockBarProps) {
+export function DockBar({}: DockBarProps) {
   const pathname = usePathname();
   const isHome = pathname === "/";
   const isKasBank = pathname === "/kas-bank";
@@ -40,12 +30,7 @@ export function DockBar({
   const isAdmin = (session?.user as { role?: string })?.role === "admin";
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
-  const [isRecordBalanceOpen, setIsRecordBalanceOpen] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-
   const userMenuRef = useRef<HTMLDivElement>(null);
-  const addMenuRef = useRef<HTMLDivElement>(null);
 
   // Close menus when clicking outside
   useEffect(() => {
@@ -56,12 +41,6 @@ export function DockBar({
       ) {
         setIsUserMenuOpen(false);
       }
-      if (
-        addMenuRef.current &&
-        !addMenuRef.current.contains(e.target as Node)
-      ) {
-        setIsAddMenuOpen(false);
-      }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -71,85 +50,8 @@ export function DockBar({
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleAddClick = (category: TransactionCategory) => {
-    setIsAddMenuOpen(false);
-    if (onAddTransaction) {
-      onAddTransaction(category);
-    }
-  };
-
   return (
     <div className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-auto">
-      {/* TRANSACTION SHORTCUT POPUP */}
-      {isAddMenuOpen && (
-        <div
-          ref={addMenuRef}
-          className="absolute bottom-16 left-1/2 -translate-x-1/2 w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-2 animate-in fade-in slide-in-from-bottom-2 duration-150 z-50 flex flex-col gap-1.5"
-        >
-          <div className="flex items-center justify-between px-2 pt-1 pb-1 border-b border-slate-100 dark:border-slate-800">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              Tambah Transaksi
-            </span>
-            <button
-              onClick={() => setIsAddMenuOpen(false)}
-              className="text-slate-400 hover:text-slate-600"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          </div>
-
-          <button
-            onClick={() => handleAddClick("transfer")}
-            className="flex items-center gap-2.5 p-2 rounded-xl text-left hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 transition-colors w-full group"
-          >
-            <div className="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 group-hover:scale-105 transition-transform">
-              <ArrowUpIcon className="h-4 w-4" />
-            </div>
-            <div>
-              <p className="text-xs font-bold leading-tight">Pemasukan</p>
-              <p className="text-[10px] text-slate-400">Transfer, pulsa, dll</p>
-            </div>
-          </button>
-
-          <button
-            onClick={() => handleAddClick("withdraw")}
-            className="flex items-center gap-2.5 p-2 rounded-xl text-left hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-700 dark:text-rose-400 transition-colors w-full group"
-          >
-            <div className="p-1.5 rounded-lg bg-rose-100 dark:bg-rose-900/50 group-hover:scale-105 transition-transform">
-              <ArrowDownIcon className="h-4 w-4" />
-            </div>
-            <div>
-              <p className="text-xs font-bold leading-tight">Pengeluaran</p>
-              <p className="text-[10px] text-slate-400">Tarik tunai, operasional</p>
-            </div>
-          </button>
-
-          <button
-            onClick={() => {
-              setIsAddMenuOpen(false);
-              if (!session) {
-                setShowLoginModal(true);
-                return;
-              }
-              if (onAddBalance) {
-                onAddBalance();
-              } else {
-                setIsRecordBalanceOpen(true);
-              }
-            }}
-            className="flex items-center gap-2.5 p-2 rounded-xl text-left hover:bg-blue-50 dark:hover:bg-blue-950/40 text-blue-700 dark:text-blue-400 transition-colors w-full group"
-          >
-            <div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/50 group-hover:scale-105 transition-transform">
-              <Landmark className="h-4 w-4" />
-            </div>
-            <div>
-              <p className="text-xs font-bold leading-tight">Sisa Saldo</p>
-              <p className="text-[10px] text-slate-400">Catat saldo bank / e-wallet</p>
-            </div>
-          </button>
-        </div>
-      )}
-
       {/* USER / PROFILE POPUP */}
       {isUserMenuOpen && (
         <div
@@ -187,7 +89,7 @@ export function DockBar({
                   setIsUserMenuOpen(false);
                   window.location.reload();
                 }}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors w-full text-left"
+                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors w-full text-left cursor-pointer"
               >
                 <LogOut className="h-4 w-4" />
                 Keluar (Logout)
@@ -226,14 +128,14 @@ export function DockBar({
 
       {/* THE DOCK CONTAINER */}
       <nav
-        className="flex items-center gap-1.5 sm:gap-2 px-3 py-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 rounded-full shadow-2xl shadow-slate-900/20"
+        className="flex items-center gap-1.5 sm:gap-2.5 px-4 py-2 bg-white/85 dark:bg-slate-900/85 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800/80 rounded-full shadow-2xl shadow-slate-900/20"
         aria-label="Bottom Dock"
       >
         {/* 1. BERANDA (HOME) */}
         {isHome ? (
           <button
             onClick={scrollToTop}
-            className="flex flex-col items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-full text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 transition-all duration-200 group active:scale-95"
+            className="flex flex-col items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-full text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 transition-all duration-200 group active:scale-95 cursor-pointer"
             title="Beranda"
           >
             <Home className="h-5 w-5 group-hover:-translate-y-0.5 transition-transform" />
@@ -254,11 +156,10 @@ export function DockBar({
           </Link>
         )}
 
-        {/* 2. SALDO KAS & BANK / E-WALLET (HALAMAN KHUSUS) */}
+        {/* 2. SALDO KAS & BANK / E-WALLET */}
         <Link
           href="/kas-bank"
           onClick={() => {
-            setIsAddMenuOpen(false);
             setIsUserMenuOpen(false);
           }}
           className={`flex flex-col items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-full transition-all duration-200 group active:scale-95 relative ${
@@ -281,26 +182,7 @@ export function DockBar({
           )}
         </Link>
 
-        {/* 3. TOMBOL TAMBAH TRANSAKSI (+) (CENTRAL PROMINENT ACTION) */}
-        <div className="px-1">
-          <button
-            onClick={() => {
-              setIsUserMenuOpen(false);
-              setIsAddMenuOpen(!isAddMenuOpen);
-            }}
-            className="flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 shadow-lg shadow-slate-900/30 hover:scale-105 active:scale-95 transition-all duration-200"
-            title="Tambah Transaksi"
-            aria-label="Tambah Transaksi"
-          >
-            <Plus
-              className={`h-5 w-5 transition-transform duration-200 ${
-                isAddMenuOpen ? "rotate-45" : ""
-              }`}
-            />
-          </button>
-        </div>
-
-        {/* 4. ADMIN PANEL (JIKA USER ADALAH ADMIN) */}
+        {/* 3. ADMIN PANEL (JIKA USER ADALAH ADMIN) */}
         {isAdmin && (
           <Link
             href="/admin/recap"
@@ -314,13 +196,12 @@ export function DockBar({
           </Link>
         )}
 
-        {/* 5. PROFIL / USER MENU */}
+        {/* 4. PROFIL / USER MENU */}
         <button
           onClick={() => {
-            setIsAddMenuOpen(false);
             setIsUserMenuOpen(!isUserMenuOpen);
           }}
-          className={`flex flex-col items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-full transition-all duration-200 group active:scale-95 relative ${
+          className={`flex flex-col items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-full transition-all duration-200 group active:scale-95 relative cursor-pointer ${
             session
               ? "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/70"
               : "text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -338,24 +219,6 @@ export function DockBar({
           </span>
         </button>
       </nav>
-
-      {/* MODAL INPUT SISA SALDO */}
-      <RecordBalanceModal
-        isOpen={isRecordBalanceOpen}
-        onClose={() => setIsRecordBalanceOpen(false)}
-        onSuccess={() => {
-          if (onBalanceSaved) {
-            onBalanceSaved();
-          }
-        }}
-        onLoginRequired={() => setShowLoginModal(true)}
-      />
-
-      {/* MODAL PERINGATAN LOGIN */}
-      <LoginRequiredModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-      />
     </div>
   );
 }

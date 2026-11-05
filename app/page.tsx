@@ -11,6 +11,7 @@ import { useState } from "react";
 import { TransactionModal } from "@/components/dashboard/TransactionModal";
 import { TransactionFilters } from "@/components/dashboard/TransactionFilters";
 import { DockBar } from "@/components/dashboard/DockBar";
+import { ArrowUpIcon, ArrowDownIcon } from "lucide-react";
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -272,9 +273,56 @@ export default function Home() {
       {/* Main Content */}
       <div className="max-w-5xl mx-auto px-4 md:px-8 mt-6">
         <div className="grid gap-6">
-          {/* Controls Removed */}
+          {/* Action Buttons: Pemasukan (Hijau) & Pengeluaran (Merah) */}
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <button
+              type="button"
+              onClick={() => {
+                if (!session) {
+                  setShowLoginModal(true);
+                  return;
+                }
+                openAddModal("income");
+              }}
+              className="flex items-center justify-center gap-2.5 sm:gap-3 py-3.5 sm:py-4 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/30 transition-all duration-200 group cursor-pointer"
+            >
+              <div className="p-1.5 sm:p-2 rounded-xl bg-white/20 group-hover:scale-110 transition-transform">
+                <ArrowUpIcon className="h-4 w-4 sm:h-5 sm:w-5 stroke-[2.5]" />
+              </div>
+              <div className="text-left">
+                <span className="block text-xs sm:text-sm font-extrabold leading-tight tracking-wide">
+                  Pemasukan
+                </span>
+                <span className="text-[10px] sm:text-xs text-emerald-100/90 font-medium hidden xs:block">
+                  Catat uang masuk
+                </span>
+              </div>
+            </button>
 
-          {/* Add Transaction Form (Removed Inline) */}
+            <button
+              type="button"
+              onClick={() => {
+                if (!session) {
+                  setShowLoginModal(true);
+                  return;
+                }
+                openAddModal("expense");
+              }}
+              className="flex items-center justify-center gap-2.5 sm:gap-3 py-3.5 sm:py-4 px-4 rounded-2xl bg-rose-600 hover:bg-rose-700 active:scale-[0.98] text-white shadow-lg shadow-rose-600/20 hover:shadow-rose-600/30 transition-all duration-200 group cursor-pointer"
+            >
+              <div className="p-1.5 sm:p-2 rounded-xl bg-white/20 group-hover:scale-110 transition-transform">
+                <ArrowDownIcon className="h-4 w-4 sm:h-5 sm:w-5 stroke-[2.5]" />
+              </div>
+              <div className="text-left">
+                <span className="block text-xs sm:text-sm font-extrabold leading-tight tracking-wide">
+                  Pengeluaran
+                </span>
+                <span className="text-[10px] sm:text-xs text-rose-100/90 font-medium hidden xs:block">
+                  Catat uang keluar
+                </span>
+              </div>
+            </button>
+          </div>
 
           {/* Filters */}
           <TransactionFilters
@@ -302,16 +350,7 @@ export default function Home() {
       </div>
 
       {/* Modern Floating Dockbar */}
-      <DockBar
-        onAddTransaction={(category) => {
-          if (!session) {
-            setShowLoginModal(true);
-            return;
-          }
-          const mode = category === "withdraw" ? "expense" : "income";
-          openAddModal(mode);
-        }}
-      />
+      <DockBar />
     </div>
   );
 }
